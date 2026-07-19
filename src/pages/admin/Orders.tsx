@@ -69,7 +69,7 @@ export default function AdminOrders() {
     return true
   })
 
-  const handleAction = (orderId: string, action: 'mark_paid' | 'mark_failed' | 'delete') => {
+  const handleAction = (orderId: string, action: 'delete') => {
     if (action === 'delete' && !confirm(t('admin_confirm_delete'))) return
     orderMutation.mutate({ orderId, action })
   }
