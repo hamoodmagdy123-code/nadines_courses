@@ -1,7 +1,7 @@
-import { MOCK_COURSES, MOCK_SITE_CONTENT } from '@/lib/data'
 import { useGeo } from '@/hooks/useGeo'
 import { Navbar } from '@/components/Navbar'
 import { CourseCard } from '@/components/CourseCard'
+import { useCourses, useFAQ } from '@/hooks/useCourses'
 import { Star, CheckCircle, MessageCircle, Shield, ChevronDown, Play, Eye, Users, Award } from 'lucide-react'
 import { useState } from 'react'
 import { useLang } from '@/i18n/context'
@@ -125,6 +125,7 @@ function HeroSection() {
 function CoursesSection() {
   const { countryCode } = useGeo()
   const { t } = useLang()
+  const { data: courses = [] } = useCourses()
 
   return (
     <section id="courses" className="relative overflow-hidden py-24">
@@ -142,7 +143,7 @@ function CoursesSection() {
         </div>
 
         <div className="space-y-8">
-          {MOCK_COURSES.filter((c) => c.is_active).map((course, i) => (
+          {courses.map((course, i) => (
             <CourseCard key={course.id} course={course} countryCode={countryCode} variant={i === 0 ? 'primary' : 'secondary'} />
           ))}
         </div>
@@ -185,7 +186,7 @@ function TrustSection() {
 }
 
 function FAQSection() {
-  const { faq: faqs } = MOCK_SITE_CONTENT
+  const { data: faqs = [] } = useFAQ()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const { t, lang } = useLang()
 

@@ -11,6 +11,8 @@ import {
   X,
 } from 'lucide-react'
 import { useLang } from '@/i18n/context'
+import { useAuth } from '@/hooks/useAuth'
+import { Loader2 } from 'lucide-react'
 
 function AdminNavItems() {
   const { t } = useLang()
@@ -22,17 +24,22 @@ function AdminNavItems() {
   ]
 }
 
-function isAuthenticated() {
-  return localStorage.getItem('admin_token') !== null
-}
-
 export function AdminLayout() {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { t } = useLang()
+  const { user, loading, signOut } = useAuth()
   const NAV_ITEMS = AdminNavItems()
 
-  if (!isAuthenticated()) {
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-paper">
+        <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
+      </div>
+    )
+  }
+
+  if (!user) {
     return <Navigate to="/admin/login" replace />
   }
 
@@ -91,8 +98,8 @@ export function AdminLayout() {
 
           <div className="border-t border-olive-100 p-3">
             <button
-              onClick={() => {
-                localStorage.removeItem('admin_token')
+              onClick={async () => {
+                await signOut()
                 window.location.href = '/admin/login'
               }}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger/5"

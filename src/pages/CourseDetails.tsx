@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { MOCK_COURSES } from '@/lib/data'
+import { useCourseBySlug } from '@/hooks/useCourses'
 import { useGeo } from '@/hooks/useGeo'
 import { formatPrice, getDisplayPrice } from '@/lib/pricing'
 import { Navbar } from '@/components/Navbar'
@@ -8,6 +8,7 @@ import { z } from 'zod/v4'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useLang } from '@/i18n/context'
+import { createOrder } from '@/lib/functions'
 import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, type LucideIcon } from 'lucide-react'
 
 const ICON_MAP: Record<string, LucideIcon> = { Package, Layers }
@@ -22,16 +23,27 @@ type PurchaseForm = z.infer<typeof purchaseSchema>
 
 export default function CourseDetails() {
   const { slug } = useParams<{ slug: string }>()
-  const course = MOCK_COURSES.find((c) => c.slug === slug)
+  const { data: course, isLoading } = useCourseBySlug(slug || '')
   const { countryCode } = useGeo()
   const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const { t, lang } = useLang()
   const dir = lang === 'ar' ? 'rtl' : 'ltr'
 
   const { register, handleSubmit, formState: { errors } } = useForm<PurchaseForm>({
     resolver: zodResolver(purchaseSchema),
   })
+
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
+        </div>
+      </>
+    )
+  }
 
   if (!course) {
     return (
@@ -48,39 +60,29 @@ export default function CourseDetails() {
     )
   }
 
+  const onSubmit = async (data: PurchaseForm) => {
+    setSubmitting(true)
+    setError(null)
+    try {
+      const result = await createOrder({
+        course_id: course.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        country_code: countryCode,
+      })
+      // Redirect to Paymob iframe
+      window.location.href = result.iframe_url
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setSubmitting(false)
+    }
+  }
+
   const title = lang === 'ar' ? course.title : course.title_en
   const desc = lang === 'ar' ? course.description : course.description_en
   const curriculum = lang === 'ar' ? course.curriculum : course.curriculum_en
   const price = getDisplayPrice(course, countryCode)
-
-  const onSubmit = async () => {
-    setSubmitting(true)
-    await new Promise((r) => setTimeout(r, 2000))
-    setSubmitting(false)
-    setSubmitted(true)
-  }
-
-  if (submitted) {
-    return (
-      <>
-        <Navbar />
-        <div className="flex min-h-[60vh] items-center justify-center px-4">
-          <div className="card mx-auto max-w-md p-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
-              <CheckCircle className="h-8 w-8 text-success" />
-            </div>
-            <h2 className="text-2xl font-bold text-olive-900">{t('success_title')}</h2>
-            <p className="mt-3 leading-relaxed text-olive-700">{t('success_message')}</p>
-            <div className="mt-4 rounded-xl bg-olive-50 p-4">
-              <p className="font-semibold text-olive-800">{t('success_next')}</p>
-              <p className="mt-1 text-sm text-olive-600">{t('success_next_text')}</p>
-            </div>
-            <Link to="/" className="btn-primary mt-6 w-full">{t('go_home')}</Link>
-          </div>
-        </div>
-      </>
-    )
-  }
 
   return (
     <>
@@ -158,6 +160,11 @@ export default function CourseDetails() {
                       <input {...register('phone')} type="tel" placeholder="01XXXXXXXXX" className="input-field" dir="ltr" />
                       {errors.phone && <p className="mt-1 text-xs text-danger">Invalid</p>}
                     </div>
+                    {error && (
+                      <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">
+                        {error}
+                      </div>
+                    )}
                     <button type="submit" disabled={submitting} className="btn-primary w-full !py-3.5 text-base">
                       {submitting ? (
                         <><Loader2 className="h-5 w-5 animate-spin" /><span>{t('form_processing')}</span></>

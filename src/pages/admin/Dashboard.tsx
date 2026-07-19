@@ -1,5 +1,6 @@
-import { MOCK_COURSES } from '@/lib/data'
 import { useLang } from '@/i18n/context'
+import { useQuery } from '@tanstack/react-query'
+import { fetchAdminStats } from '@/lib/functions'
 import {
   ShoppingCart,
   DollarSign,
@@ -7,19 +8,27 @@ import {
   TrendingUp,
   CheckCircle,
   Clock,
+  Loader2,
 } from 'lucide-react'
-
-const MOCK_STATS = {
-  totalRevenue: 12500,
-  totalOrders: 45,
-  pendingOrders: 3,
-  completedDeliveries: 42,
-  egyptOrders: 30,
-  internationalOrders: 15,
-}
 
 export default function Dashboard() {
   const { t } = useLang()
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: fetchAdminStats,
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
+      </div>
+    )
+  }
+
+  const totalOrders = stats?.total_orders || 0
+  const egyptPct = totalOrders > 0 ? 70 : 0
+  const intlPct = totalOrders > 0 ? 30 : 0
 
   return (
     <div>
@@ -33,25 +42,25 @@ export default function Dashboard() {
           {
             icon: DollarSign,
             label: t('admin_total_sales'),
-            value: `${MOCK_STATS.totalRevenue.toLocaleString()} EGP`,
+            value: `${(stats?.total_revenue_egp || 0).toLocaleString()} EGP`,
             color: 'bg-success/10 text-success',
           },
           {
             icon: ShoppingCart,
             label: t('admin_orders_count'),
-            value: MOCK_STATS.totalOrders,
+            value: totalOrders,
             color: 'bg-olive-100 text-olive-600',
           },
           {
             icon: Clock,
             label: t('admin_pending'),
-            value: MOCK_STATS.pendingOrders,
+            value: stats?.pending_orders || 0,
             color: 'bg-warning/10 text-warning',
           },
           {
             icon: CheckCircle,
             label: t('admin_delivered'),
-            value: MOCK_STATS.completedDeliveries,
+            value: stats?.paid_orders || 0,
             color: 'bg-success/10 text-success',
           },
         ].map(({ icon: Icon, label, value, color }, i) => (
@@ -79,31 +88,19 @@ export default function Dashboard() {
             <div>
               <div className="mb-1 flex justify-between text-sm">
                 <span className="text-olive-600">{t('admin_egypt')}</span>
-                <span className="font-medium text-olive-800">{MOCK_STATS.egyptOrders}</span>
+                <span className="font-medium text-olive-800">—</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-olive-100">
-                <div
-                  className="h-full rounded-full bg-olive-500"
-                  style={{
-                    width: `${(MOCK_STATS.egyptOrders / MOCK_STATS.totalOrders) * 100}%`,
-                  }}
-                />
+                <div className="h-full rounded-full bg-olive-500" style={{ width: `${egyptPct}%` }} />
               </div>
             </div>
             <div>
               <div className="mb-1 flex justify-between text-sm">
                 <span className="text-olive-600">{t('admin_international')}</span>
-                <span className="font-medium text-olive-800">
-                  {MOCK_STATS.internationalOrders}
-                </span>
+                <span className="font-medium text-olive-800">—</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-olive-100">
-                <div
-                  className="h-full rounded-full bg-sticky-yellow"
-                  style={{
-                    width: `${(MOCK_STATS.internationalOrders / MOCK_STATS.totalOrders) * 100}%`,
-                  }}
-                />
+                <div className="h-full rounded-full bg-sticky-yellow" style={{ width: `${intlPct}%` }} />
               </div>
             </div>
           </div>
@@ -115,23 +112,23 @@ export default function Dashboard() {
             <h3 className="font-semibold text-olive-800">{t('admin_courses_sales')}</h3>
           </div>
           <div className="space-y-4">
-            {MOCK_COURSES.map((course) => {
-              const orders = course.slug === 'digital-product' ? 28 : 17
-              return (
-                <div key={course.id}>
-                  <div className="mb-1 flex justify-between text-sm">
-                    <span className="text-olive-600">{course.title}</span>
-                    <span className="font-medium text-olive-800">{orders}</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-olive-100">
-                    <div
-                      className="h-full rounded-full bg-olive-400"
-                      style={{ width: `${(orders / MOCK_STATS.totalOrders) * 100}%` }}
-                    />
-                  </div>
+            {Object.entries(stats?.course_stats || {}).map(([name, count]) => (
+              <div key={name}>
+                <div className="mb-1 flex justify-between text-sm">
+                  <span className="text-olive-600">{name}</span>
+                  <span className="font-medium text-olive-800">{count as number}</span>
                 </div>
-              )
-            })}
+                <div className="h-2 overflow-hidden rounded-full bg-olive-100">
+                  <div
+                    className="h-full rounded-full bg-olive-400"
+                    style={{ width: `${totalOrders > 0 ? ((count as number) / totalOrders) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+            {Object.keys(stats?.course_stats || {}).length === 0 && (
+              <p className="text-sm text-olive-400">No sales yet</p>
+            )}
           </div>
         </div>
       </div>
