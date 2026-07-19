@@ -40,13 +40,31 @@ Deno.serve(async (req) => {
       return errorResp("Missing order_id or action");
     }
 
-    if (action === "delete") {
+    if (action === "archive") {
+      const { error } = await supabase
+        .from("orders")
+        .update({ is_archived: true })
+        .eq("id", order_id);
+      if (error) throw error;
+      return jsonResp({ message: "Order archived" });
+    }
+
+    if (action === "restore") {
+      const { error } = await supabase
+        .from("orders")
+        .update({ is_archived: false })
+        .eq("id", order_id);
+      if (error) throw error;
+      return jsonResp({ message: "Order restored" });
+    }
+
+    if (action === "permanent-delete") {
       const { error } = await supabase
         .from("orders")
         .delete()
         .eq("id", order_id);
       if (error) throw error;
-      return jsonResp({ message: "Order deleted" });
+      return jsonResp({ message: "Order permanently deleted" });
     }
 
     return errorResp("Unknown action");

@@ -13,22 +13,47 @@ import {
   Mail,
   Loader2,
   Trash2,
+  Archive,
+  RotateCcw,
 } from 'lucide-react'
 
 export default function AdminOrders() {
   const [filter, setFilter] = useState<string>('all')
+  const [showArchived, setShowArchived] = useState(false)
   const [search, setSearch] = useState('')
   const { t } = useLang()
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-orders', filter],
-    queryFn: () => fetchAdminOrders(filter !== 'all' ? { status: filter } : undefined),
+    queryKey: ['admin-orders', filter, showArchived],
+    queryFn: () =>
+      fetchAdminOrders({
+        ...(filter !== 'all' ? { status: filter } : {}),
+        archived: showArchived,
+      }),
   })
 
-  const orderMutation = useMutation({
+  const archiveMutation = useMutation({
     mutationFn: ({ orderId }: { orderId: string }) =>
-      adminUpdateOrder(orderId, 'delete'),
+      adminUpdateOrder(orderId, 'archive'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
+    },
+  })
+
+  const restoreMutation = useMutation({
+    mutationFn: ({ orderId }: { orderId: string }) =>
+      adminUpdateOrder(orderId, 'restore'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
+    },
+  })
+
+  const permanentDeleteMutation = useMutation({
+    mutationFn: ({ orderId }: { orderId: string }) =>
+      adminUpdateOrder(orderId, 'permanent-delete'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
@@ -69,9 +94,19 @@ export default function AdminOrders() {
     return true
   })
 
-  const handleDelete = (orderId: string) => {
-    if (!confirm(t('admin_confirm_delete'))) return
-    orderMutation.mutate({ orderId })
+  const handleArchive = (orderId: string) => {
+    if (!confirm(t('admin_confirm_archive'))) return
+    archiveMutation.mutate({ orderId })
+  }
+
+  const handleRestore = (orderId: string) => {
+    if (!confirm(t('admin_confirm_restore'))) return
+    restoreMutation.mutate({ orderId })
+  }
+
+  const handlePermanentDelete = (orderId: string) => {
+    if (!confirm(t('admin_confirm_permanent_delete'))) return
+    permanentDeleteMutation.mutate({ orderId })
   }
 
   if (isLoading) {
@@ -101,19 +136,36 @@ export default function AdminOrders() {
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-olive-400" />
-          {FILTER_OPTIONS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                filter === f.value
-                  ? 'bg-olive-100 text-olive-700'
-                  : 'bg-paper-dim text-olive-600 hover:bg-olive-100'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+          {!showArchived &&
+            FILTER_OPTIONS.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  filter === f.value
+                    ? 'bg-olive-100 text-olive-700'
+                    : 'bg-paper-dim text-olive-600 hover:bg-olive-100'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          <button
+            onClick={() => {
+              setShowArchived(!showArchived)
+              setFilter('all')
+            }}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              showArchived
+                ? 'bg-olive-700 text-white'
+                : 'bg-paper-dim text-olive-600 hover:bg-olive-100'
+            }`}
+          >
+            <span className="flex items-center gap-1">
+              <Archive className="h-3 w-3" />
+              {t('admin_archived')}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -160,7 +212,7 @@ export default function AdminOrders() {
                   </td>
                   <td className="px-4 py-3 text-sm text-olive-500">{new Date(order.created_at as string).toLocaleDateString()}</td>
                   <td className="px-4 py-3">
-                    {status === 'paid' ? (
+                    {!showArchived && status === 'paid' ? (
                       <button
                         onClick={() => telegramMutation.mutate(order.id as string)}
                         disabled={telegramMutation.isPending}
@@ -183,14 +235,37 @@ export default function AdminOrders() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => handleDelete(order.id as string)}
-                      disabled={orderMutation.isPending}
-                      title={t('admin_delete_order')}
-                      className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      {showArchived ? (
+                        <>
+                          <button
+                            onClick={() => handleRestore(order.id as string)}
+                            disabled={restoreMutation.isPending}
+                            title={t('admin_restore_order')}
+                            className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-success/10 hover:text-success disabled:opacity-50"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handlePermanentDelete(order.id as string)}
+                            disabled={permanentDeleteMutation.isPending}
+                            title={t('admin_permanent_delete')}
+                            className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleArchive(order.id as string)}
+                          disabled={archiveMutation.isPending}
+                          title={t('admin_archive_order')}
+                          className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-warning/10 hover:text-warning disabled:opacity-50"
+                        >
+                          <Archive className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )
@@ -235,7 +310,7 @@ export default function AdminOrders() {
                   <p className="font-bold text-olive-800">{order.amount as number} {order.currency as string}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  {status === 'paid' && (
+                  {!showArchived && status === 'paid' && (
                     <button
                       onClick={() => telegramMutation.mutate(order.id as string)}
                       disabled={telegramMutation.isPending}
@@ -248,9 +323,20 @@ export default function AdminOrders() {
                       {telegramMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : order.telegram_added ? t('admin_delivered_done') : t('admin_mark_telegram')}
                     </button>
                   )}
-                  <button onClick={() => handleDelete(order.id as string)} disabled={orderMutation.isPending} title={t('admin_delete_order')} className="rounded-lg p-2 text-olive-400 hover:bg-danger/10 hover:text-danger disabled:opacity-50">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  {showArchived ? (
+                    <>
+                      <button onClick={() => handleRestore(order.id as string)} disabled={restoreMutation.isPending} title={t('admin_restore_order')} className="rounded-lg p-2 text-olive-400 hover:bg-success/10 hover:text-success disabled:opacity-50">
+                        <RotateCcw className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handlePermanentDelete(order.id as string)} disabled={permanentDeleteMutation.isPending} title={t('admin_permanent_delete')} className="rounded-lg p-2 text-olive-400 hover:bg-danger/10 hover:text-danger disabled:opacity-50">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => handleArchive(order.id as string)} disabled={archiveMutation.isPending} title={t('admin_archive_order')} className="rounded-lg p-2 text-olive-400 hover:bg-warning/10 hover:text-warning disabled:opacity-50">
+                      <Archive className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -261,7 +347,7 @@ export default function AdminOrders() {
       {filtered.length === 0 && (
         <div className="py-16 text-center">
           <p className="text-4xl">📋</p>
-          <p className="mt-3 text-olive-500">{t('admin_no_orders')}</p>
+          <p className="mt-3 text-olive-500">{showArchived ? t('admin_no_orders') : t('admin_no_orders')}</p>
         </div>
       )}
     </div>

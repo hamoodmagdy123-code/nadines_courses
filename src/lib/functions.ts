@@ -35,10 +35,12 @@ export async function createOrder(payload: {
 export async function fetchAdminOrders(params?: {
   status?: string
   course_id?: string
+  archived?: boolean
 }) {
   const url = new URL(`${FUNCTIONS_BASE}/admin-orders`)
   if (params?.status) url.searchParams.set('status', params.status)
   if (params?.course_id) url.searchParams.set('course_id', params.course_id)
+  if (params?.archived) url.searchParams.set('archived', 'true')
 
   const res = await fetch(url.toString(), {
     headers: await getAuthHeaders(),
@@ -76,7 +78,7 @@ export async function updateCourse(course_id: string, updates: Record<string, un
   return res.json()
 }
 
-export async function adminUpdateOrder(order_id: string, action: 'delete') {
+export async function adminUpdateOrder(order_id: string, action: 'archive' | 'restore' | 'permanent-delete') {
   const res = await fetch(`${FUNCTIONS_BASE}/admin-update-order`, {
     method: 'POST',
     headers: await getAuthHeaders(),

@@ -36,10 +36,12 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const status = url.searchParams.get("status");
     const courseId = url.searchParams.get("course_id");
+    const showArchived = url.searchParams.get("archived") === "true";
 
     let query = supabase
       .from("orders")
       .select("*, courses(slug, title, title_en)")
+      .eq("is_archived", showArchived)
       .order("created_at", { ascending: false });
 
     if (status) query = query.eq("status", status);
