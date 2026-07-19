@@ -10,30 +10,34 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") {
+    return errorResp("Method not allowed", 405);
+  }
+
   try {
     const url = new URL(req.url);
-    const hmac = url.searchParams.get("hmac");
-    const body = await req.json();
-    const obj = body.obj;
+    const hmacParam = url.searchParams.get("hmac");
+    const rawBody = await req.text();
 
-    console.log("Webhook received:", JSON.stringify(body));
-
-    if (!hmac) {
+    if (!hmacParam) {
+      console.error("Webhook called without HMAC");
       return errorResp("Missing HMAC", 401);
     }
 
+    const body = JSON.parse(rawBody);
+    const obj = body.obj;
+
     if (!obj) {
-      return errorResp("Missing obj in body", 400);
+      console.error("Webhook missing obj field");
+      return errorResp("Invalid payload", 400);
     }
 
-    const hmacSecret = Deno.env.get("PAYMOB_HMAC_SECRET")!;
-
+    const hmacSecret = Deno.env.get("PAYMOB_HMAC_SECRET");
     if (!hmacSecret) {
-      console.error("PAYMOB_HMAC_SECRET not set!");
+      console.error("PAYMOB_HMAC_SECRET not configured");
       return errorResp("HMAC secret not configured", 500);
     }
 
-    // Intention API HMAC fields in exact order
     const fields = [
       obj.amount_cents,
       obj.created_at,
@@ -58,7 +62,6 @@ Deno.serve(async (req) => {
     ];
 
     const hmacString = fields.filter((f) => f !== undefined).join("");
-
     const encoder = new TextEncoder();
     const keyData = encoder.encode(hmacSecret);
     const msgData = encoder.encode(hmacString);
@@ -75,54 +78,67 @@ Deno.serve(async (req) => {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    if (computedHmac !== hmac) {
-      console.error("HMAC mismatch:", { computed: computedHmac, received: hmac });
+    if (computedHmac !== hmacParam) {
+      console.error("HMAC verification failed");
       return errorResp("Invalid HMAC", 401);
     }
 
     const supabase = getSupabaseClient(true);
 
-    // Find order by special_reference (our order.id) or paymob_order_id
-    const paymobOrderId = String(obj.order?.id);
-    const { data: order, error: orderErr } = await supabase
-      .from("orders")
-      .select("*")
-      .or(`paymob_order_id.eq.${paymobOrderId},id.eq.${obj.special_reference || ""}`)
-      .single();
+    const paymobOrderId = String(obj.order?.id || "");
+    const transactionId = String(obj.id || "");
+    const specialRef = obj.special_reference || "";
 
-    if (orderErr || !order) {
-      console.error("Order not found for paymob_order_id:", paymobOrderId);
-      return errorResp("Order not found", 404);
+    let order = null;
+
+    if (paymobOrderId) {
+      const result = await supabase
+        .from("orders")
+        .select("*")
+        .eq("paymob_order_id", paymobOrderId)
+        .maybeSingle();
+      order = result.data;
     }
 
-    // Idempotency
+    if (!order && specialRef) {
+      const result = await supabase
+        .from("orders")
+        .select("*")
+        .eq("id", specialRef)
+        .maybeSingle();
+      order = result.data;
+    }
+
+    if (!order) {
+      console.error("Order not found:", paymobOrderId, specialRef);
+      return jsonResp({ message: "Order not found" }, 200);
+    }
+
     if (order.status === "paid" || order.status === "failed") {
-      return jsonResp({ message: "Already processed", status: order.status });
+      return jsonResp({ message: "Already processed" });
     }
 
     if (obj.success) {
-      const { error: updateErr } = await supabase
+      const { error } = await supabase
         .from("orders")
         .update({
           status: "paid",
           hmac_verified: true,
-          paymob_transaction_id: String(obj.id),
+          paymob_transaction_id: transactionId,
         })
         .eq("id", order.id);
-
-      if (updateErr) throw updateErr;
-      return jsonResp({ message: "Order marked as paid", order_id: order.id });
+      if (error) throw error;
+      return jsonResp({ message: "Paid" });
     } else {
-      const { error: updateErr } = await supabase
+      const { error } = await supabase
         .from("orders")
         .update({ status: "failed" })
         .eq("id", order.id);
-
-      if (updateErr) throw updateErr;
-      return jsonResp({ message: "Order marked as failed", order_id: order.id });
+      if (error) throw error;
+      return jsonResp({ message: "Failed" });
     }
   } catch (err) {
     console.error("paymob-webhook error:", err);
-    return errorResp("Internal server error", 500);
+    return jsonResp({ error: "Internal error" }, 500);
   }
 });
