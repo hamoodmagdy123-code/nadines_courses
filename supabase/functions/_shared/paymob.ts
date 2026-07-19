@@ -89,7 +89,12 @@ function buildCheckoutUrl(
   publicKey: string,
   clientSecret: string
 ): string {
-  return `${PAYMOB_BASE}/unifiedcheckout/?publicKey=${publicKey}&clientSecret=${clientSecret}`;
+  // Test keys require accept-beta.paymob.com for checkout
+  const isTest = publicKey.includes("_test_") || clientSecret.includes("_test_");
+  const checkoutBase = isTest
+    ? "https://accept-beta.paymob.com"
+    : PAYMOB_BASE;
+  return `${checkoutBase}/unifiedcheckout/?publicKey=${publicKey}&clientSecret=${clientSecret}`;
 }
 
 export {
