@@ -2,14 +2,12 @@ import {
   getSupabaseClient,
   jsonResp,
   errorResp,
-  paymobAuth,
-  paymobCreateOrder,
-  paymobPaymentKey,
+  paymobCreateIntention,
+  buildCheckoutUrl,
   corsHeaders,
-  serve,
 } from "../_shared/paymob.ts";
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -35,7 +33,6 @@ serve(async (req) => {
       return errorResp("Course not found");
     }
 
-    // Determine currency and amount server-side
     const isEgypt = country_code === "EG";
     const currency = isEgypt ? "EGP" : "USD";
     const amount = isEgypt
@@ -60,51 +57,56 @@ serve(async (req) => {
 
     if (orderErr) throw orderErr;
 
-    // Paymob flow
-    const paymobApiKey = Deno.env.get("PAYMOB_API_KEY")!;
-    const paymobIntegrationId = Deno.env.get("PAYMOB_INTEGRATION_ID")!;
+    const secretKey = Deno.env.get("PAYMOB_SECRET_KEY")!;
+    const publicKey = Deno.env.get("PAYMOB_PUBLIC_KEY")!;
+    const integrationId = Number(Deno.env.get("PAYMOB_INTEGRATION_ID")!);
+    const siteUrl = Deno.env.get("SITE_URL") || "https://nadines-courses.vercel.app";
 
-    const paymobToken = await paymobAuth(paymobApiKey);
-    const paymobOrderId = await paymobCreateOrder(
-      paymobToken,
-      Math.round(amount * 100), // cents
-      order.id
-    );
+    const billingData = {
+      email,
+      phone_number: phone || "+201000000000",
+      first_name: name.split(" ")[0] || name,
+      last_name: name.split(" ").slice(1).join(" ") || "User",
+      street: "N/A",
+      building: "N/A",
+      floor: "N/A",
+      apartment: "N/A",
+      city: "Cairo",
+      country: country_code || "EG",
+      state: "Cairo",
+    };
+
+    const amountCents = Math.round(amount * 100);
+
+    const intention = await paymobCreateIntention({
+      secretKey,
+      amountCents,
+      currency,
+      integrationId,
+      billingData,
+      items: [{ name: course.title_en || course.title, amount: amountCents }],
+      specialReference: order.id,
+      notificationUrl: `https://kzlbuxteyiyhjeaflplo.functions.supabase.co/paymob-webhook`,
+      redirectionUrl: `${siteUrl}/checkout/success?order_id=${order.id}`,
+    });
 
     // Update order with paymob_order_id
     await supabase
       .from("orders")
-      .update({ paymob_order_id: paymobOrderId })
+      .update({ paymob_order_id: String(intention.intention_order_id) })
       .eq("id", order.id);
 
-    const billingData = {
-      email: email,
-      phone_number: phone || "+201000000000",
-      first_name: name.split(" ")[0] || name,
-      last_name: name.split(" ").slice(1).join(" ") || name,
-      country: country_code || "EG",
-    };
-
-    const paymentToken = await paymobPaymentKey(
-      paymobToken,
-      paymobOrderId,
-      paymobIntegrationId,
-      Math.round(amount * 100),
-      billingData
-    );
-
-    // Build iframe URL
-    const iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/856332?payment_token=${paymentToken}`;
+    const checkoutUrl = buildCheckoutUrl(publicKey, intention.client_secret);
 
     return jsonResp({
       order_id: order.id,
-      payment_token: paymentToken,
-      iframe_url: iframeUrl,
+      checkout_url: checkoutUrl,
       amount,
       currency,
     });
   } catch (err) {
     console.error("create-order error:", err);
-    return errorResp("Internal server error", 500);
+    const message = err instanceof Error ? err.message : String(err);
+    return jsonResp({ error: "Internal server error", detail: message }, 500);
   }
 });

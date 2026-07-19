@@ -71,8 +71,8 @@ export default function CourseDetails() {
         phone: data.phone,
         country_code: countryCode,
       })
-      // Redirect to Paymob iframe
-      window.location.href = result.iframe_url
+      // Redirect to Paymob Unified Checkout
+      window.location.href = result.checkout_url
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setSubmitting(false)
