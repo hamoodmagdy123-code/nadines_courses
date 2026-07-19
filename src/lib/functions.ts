@@ -76,7 +76,7 @@ export async function updateCourse(course_id: string, updates: Record<string, un
   return res.json()
 }
 
-export async function adminUpdateOrder(order_id: string, action: 'mark_paid' | 'mark_failed' | 'delete') {
+export async function adminUpdateOrder(order_id: string, action: 'delete') {
   const res = await fetch(`${FUNCTIONS_BASE}/admin-update-order`, {
     method: 'POST',
     headers: await getAuthHeaders(),

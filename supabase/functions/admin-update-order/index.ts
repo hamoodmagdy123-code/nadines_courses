@@ -40,24 +40,6 @@ Deno.serve(async (req) => {
       return errorResp("Missing order_id or action");
     }
 
-    if (action === "mark_paid") {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status: "paid" })
-        .eq("id", order_id);
-      if (error) throw error;
-      return jsonResp({ message: "Order marked as paid" });
-    }
-
-    if (action === "mark_failed") {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status: "failed" })
-        .eq("id", order_id);
-      if (error) throw error;
-      return jsonResp({ message: "Order marked as failed" });
-    }
-
     if (action === "delete") {
       const { error } = await supabase
         .from("orders")

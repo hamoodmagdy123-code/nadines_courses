@@ -13,8 +13,6 @@ import {
   Mail,
   Loader2,
   Trash2,
-  DollarSign,
-  Ban,
 } from 'lucide-react'
 
 export default function AdminOrders() {
@@ -180,36 +178,14 @@ export default function AdminOrders() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      {status !== 'paid' && (
-                        <button
-                          onClick={() => handleAction(order.id as string, 'mark_paid')}
-                          disabled={orderMutation.isPending}
-                          title={t('admin_mark_paid')}
-                          className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-success/10 hover:text-success disabled:opacity-50"
-                        >
-                          <DollarSign className="h-4 w-4" />
-                        </button>
-                      )}
-                      {status !== 'failed' && (
-                        <button
-                          onClick={() => handleAction(order.id as string, 'mark_failed')}
-                          disabled={orderMutation.isPending}
-                          title={t('admin_mark_failed')}
-                          className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-warning/10 hover:text-warning disabled:opacity-50"
-                        >
-                          <Ban className="h-4 w-4" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleAction(order.id as string, 'delete')}
-                        disabled={orderMutation.isPending}
-                        title={t('admin_delete_order')}
-                        className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleAction(order.id as string, 'delete')}
+                      disabled={orderMutation.isPending}
+                      title={t('admin_delete_order')}
+                      className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </td>
                 </tr>
               )
@@ -268,16 +244,6 @@ export default function AdminOrders() {
                       <CheckCircle className="h-3 w-3" />
                       {t('admin_delivered_done')}
                     </span>
-                  )}
-                  {status !== 'paid' && (
-                    <button onClick={() => handleAction(order.id as string, 'mark_paid')} disabled={orderMutation.isPending} title={t('admin_mark_paid')} className="rounded-lg p-2 text-olive-400 hover:bg-success/10 hover:text-success disabled:opacity-50">
-                      <DollarSign className="h-4 w-4" />
-                    </button>
-                  )}
-                  {status !== 'failed' && (
-                    <button onClick={() => handleAction(order.id as string, 'mark_failed')} disabled={orderMutation.isPending} title={t('admin_mark_failed')} className="rounded-lg p-2 text-olive-400 hover:bg-warning/10 hover:text-warning disabled:opacity-50">
-                      <Ban className="h-4 w-4" />
-                    </button>
                   )}
                   <button onClick={() => handleAction(order.id as string, 'delete')} disabled={orderMutation.isPending} title={t('admin_delete_order')} className="rounded-lg p-2 text-olive-400 hover:bg-danger/10 hover:text-danger disabled:opacity-50">
                     <Trash2 className="h-4 w-4" />
