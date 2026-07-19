@@ -1,12 +1,14 @@
 import { supabase } from './supabase'
 
 const FUNCTIONS_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 async function getAuthHeaders() {
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
   return {
     'Content-Type': 'application/json',
+    'apikey': SUPABASE_ANON_KEY,
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
 }
