@@ -56,7 +56,8 @@ export function useFAQ() {
         .eq('section_key', 'faq')
         .single()
       if (error) throw error
-      return data.content as Array<{
+      const content = data.content as Record<string, unknown>
+      return (content.items || content) as Array<{
         question: string
         answer: string
         question_en: string

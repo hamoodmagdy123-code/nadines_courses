@@ -32,7 +32,7 @@ export function Navbar() {
             ن
           </span>
           <span className="hidden text-sm font-bold text-olive-900 sm:inline">
-            نادين كورسز
+            {lang === 'ar' ? 'نادين كورسز' : 'Nadine Courses'}
           </span>
         </Link>
 

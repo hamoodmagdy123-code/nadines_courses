@@ -101,3 +101,29 @@ export async function fetchAdminStats() {
   }
   return res.json()
 }
+
+export async function createCourse(course: Record<string, unknown>) {
+  const res = await fetch(`${FUNCTIONS_BASE}/create-course`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(course),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Request failed' }))
+    throw new Error(err.error || 'Failed to create course')
+  }
+  return res.json()
+}
+
+export async function deleteCourse(course_id: string) {
+  const res = await fetch(`${FUNCTIONS_BASE}/delete-course`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify({ course_id }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Request failed' }))
+    throw new Error(err.error || 'Failed to delete course')
+  }
+  return res.json()
+}

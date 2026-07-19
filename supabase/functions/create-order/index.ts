@@ -4,12 +4,22 @@ import {
   errorResp,
   paymobCreateIntention,
   buildCheckoutUrl,
-  corsHeaders,
+  getCorsHeaders,
 } from "../_shared/paymob.ts";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 Deno.serve(async (req) => {
+  const origin = req.headers.get("Origin");
+  const cors = getCorsHeaders(origin);
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: cors });
+  }
+
+  if (req.method !== "POST") {
+    return errorResp("Method not allowed", 405);
   }
 
   try {
@@ -20,13 +30,33 @@ Deno.serve(async (req) => {
       return errorResp("Missing required fields: course_id, name, email");
     }
 
+    if (!UUID_RE.test(course_id)) {
+      return errorResp("Invalid course_id format");
+    }
+
+    if (typeof name !== "string" || name.trim().length < 2 || name.length > 200) {
+      return errorResp("Invalid name");
+    }
+
+    if (!EMAIL_RE.test(email)) {
+      return errorResp("Invalid email format");
+    }
+
+    if (phone && (typeof phone !== "string" || phone.length > 20)) {
+      return errorResp("Invalid phone number");
+    }
+
+    if (country_code && typeof country_code !== "string") {
+      return errorResp("Invalid country_code");
+    }
+
     const supabase = getSupabaseClient(true);
 
-    // Fetch course
     const { data: course, error: courseErr } = await supabase
       .from("courses")
       .select("*")
       .eq("id", course_id)
+      .eq("is_active", true)
       .single();
 
     if (courseErr || !course) {
@@ -39,13 +69,12 @@ Deno.serve(async (req) => {
       ? Number(course.egypt_price)
       : Number(course.international_price_usd);
 
-    // Insert order (pending)
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .insert({
         course_id,
-        customer_name: name,
-        customer_email: email,
+        customer_name: name.trim(),
+        customer_email: email.trim().toLowerCase(),
         customer_phone: phone || null,
         country_code: country_code || null,
         currency,
@@ -63,10 +92,10 @@ Deno.serve(async (req) => {
     const siteUrl = Deno.env.get("SITE_URL") || "https://nadines-courses.vercel.app";
 
     const billingData = {
-      email,
+      email: email.trim().toLowerCase(),
       phone_number: phone || "+201000000000",
-      first_name: name.split(" ")[0] || name,
-      last_name: name.split(" ").slice(1).join(" ") || "User",
+      first_name: name.trim().split(" ")[0] || name.trim(),
+      last_name: name.trim().split(" ").slice(1).join(" ") || "User",
       street: "N/A",
       building: "N/A",
       floor: "N/A",
@@ -90,7 +119,6 @@ Deno.serve(async (req) => {
       redirectionUrl: `${siteUrl}/checkout/success?order_id=${order.id}`,
     });
 
-    // Update order with paymob_order_id
     await supabase
       .from("orders")
       .update({ paymob_order_id: String(intention.intention_order_id) })
@@ -105,8 +133,7 @@ Deno.serve(async (req) => {
       currency,
     });
   } catch (err) {
-    console.error("create-order error:", err);
-    const message = err instanceof Error ? err.message : String(err);
-    return jsonResp({ error: "Internal server error", detail: message }, 500);
+    console.error("create-order error:", err instanceof Error ? err.message : "unknown");
+    return jsonResp({ error: "Internal server error" }, 500);
   }
 });

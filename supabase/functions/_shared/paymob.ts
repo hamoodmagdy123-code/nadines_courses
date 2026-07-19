@@ -1,10 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+const SITE_URL = Deno.env.get("SITE_URL") || "https://nadines-courses.vercel.app";
+
+function getCorsHeaders(origin?: string | null) {
+  const allowed = [SITE_URL, "https://nadines-courses.vercel.app"];
+  const isAllowed = origin && allowed.some((a) => origin.startsWith(a));
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "*",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+  };
+}
 
 function getSupabaseClient(serviceRole = false) {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -14,15 +20,23 @@ function getSupabaseClient(serviceRole = false) {
   return createClient(supabaseUrl, key);
 }
 
-function jsonResp(data: unknown, status = 200) {
+function jsonResp(data: unknown, status = 200, headers?: Record<string, string>) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(), "Content-Type": "application/json", ...headers },
   });
 }
 
-function errorResp(message: string, status = 400) {
-  return jsonResp({ error: message }, status);
+function errorResp(message: string, status = 400, headers?: Record<string, string>) {
+  return jsonResp({ error: message }, status, headers);
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  const encoder = new TextEncoder();
+  const aBytes = encoder.encode(a);
+  const bBytes = encoder.encode(b);
+  return crypto.subtle.timingSafeEqual(aBytes, bBytes);
 }
 
 const PAYMOB_BASE = "https://accept.paymob.com";
@@ -62,7 +76,7 @@ async function paymobCreateIntention(params: {
   if (notificationUrl) payload.notification_url = notificationUrl;
   if (redirectionUrl) payload.redirection_url = redirectionUrl;
 
-  console.log("Paymob intention payload:", JSON.stringify(payload));
+  console.log("Paymob intention request:", JSON.stringify({ amount: amountCents, currency, items: items.length }));
 
   const res = await fetch(`${PAYMOB_BASE}/v1/intention/`, {
     method: "POST",
@@ -75,8 +89,8 @@ async function paymobCreateIntention(params: {
 
   const data = await res.json();
   if (!res.ok) {
-    console.error("Paymob intention failed:", JSON.stringify(data));
-    throw new Error(`Paymob intention failed: ${JSON.stringify(data)}`);
+    console.error("Paymob intention failed:", res.status);
+    throw new Error("Payment processing failed");
   }
 
   return {
@@ -93,10 +107,11 @@ function buildCheckoutUrl(
 }
 
 export {
-  corsHeaders,
+  getCorsHeaders,
   getSupabaseClient,
   jsonResp,
   errorResp,
   paymobCreateIntention,
   buildCheckoutUrl,
+  timingSafeEqual,
 };

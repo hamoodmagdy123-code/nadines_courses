@@ -8,6 +8,7 @@ import { z } from 'zod/v4'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useLang } from '@/i18n/context'
+import { useSC } from '@/hooks/useSiteContent'
 import { createOrder } from '@/lib/functions'
 import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, type LucideIcon } from 'lucide-react'
 
@@ -27,7 +28,8 @@ export default function CourseDetails() {
   const { countryCode } = useGeo()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { t, lang } = useLang()
+  const { lang } = useLang()
+  const { tr } = useSC()
   const dir = lang === 'ar' ? 'rtl' : 'ltr'
 
   const { register, handleSubmit, formState: { errors } } = useForm<PurchaseForm>({
@@ -52,8 +54,8 @@ export default function CourseDetails() {
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="text-center">
             <p className="text-6xl">😕</p>
-            <h2 className="mt-4 text-2xl font-bold text-olive-900">{t('course_not_found')}</h2>
-            <Link to="/" className="btn-primary mt-6">{t('go_home')}</Link>
+            <h2 className="mt-4 text-2xl font-bold text-olive-900">{tr('course_page', 'not_found')}</h2>
+            <Link to="/" className="btn-primary mt-6">{tr('course_page', 'go_home')}</Link>
           </div>
         </div>
       </>
@@ -71,7 +73,6 @@ export default function CourseDetails() {
         phone: data.phone,
         country_code: countryCode,
       })
-      // Redirect to Paymob Unified Checkout
       window.location.href = result.checkout_url
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -91,7 +92,7 @@ export default function CourseDetails() {
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
           <Link to="/" className={`mb-8 inline-flex items-center gap-2 text-sm font-medium text-olive-500 transition-colors hover:text-olive-700 ${dir === 'ltr' ? 'flex-row-reverse' : ''}`}>
             <ArrowRight className={`h-4 w-4 ${dir === 'ltr' ? 'rotate-180' : ''}`} />
-            <span>{t('back')}</span>
+            <span>{tr('course_page', 'back')}</span>
           </Link>
 
           <div className="grid gap-8 lg:grid-cols-5">
@@ -107,7 +108,7 @@ export default function CourseDetails() {
               </div>
 
               <div className="mt-8">
-                <h2 className="mb-4 text-xl font-bold text-olive-900">{t('course_curriculum')}</h2>
+                <h2 className="mb-4 text-xl font-bold text-olive-900">{tr('course_page', 'curriculum_title')}</h2>
                 <div className="space-y-3">
                   {curriculum.map((item, i) => (
                     <div key={i} className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
@@ -130,13 +131,13 @@ export default function CourseDetails() {
                     </p>
                     {!price.isEgypt && (
                       <p className="mt-1 text-sm text-olive-400">
-                        {t('courses_pay_usd')} — {formatPrice(course.international_price_usd, 'USD')}
+                        {tr('courses_header', 'pay_usd_label')} — {formatPrice(course.international_price_usd, 'USD')}
                       </p>
                     )}
                   </div>
 
                   <div className="mb-6 space-y-3 rounded-2xl bg-olive-50 p-4">
-                    {[t('form_benefits_1'), t('form_benefits_2'), t('form_benefits_3')].map((b, i) => (
+                    {[tr('course_page', 'form_benefits_1'), tr('course_page', 'form_benefits_2'), tr('course_page', 'form_benefits_3')].map((b, i) => (
                       <div key={i} className="flex items-center gap-2 text-sm text-olive-700">
                         <CheckCircle className="h-4 w-4 text-success" />
                         <span>{b}</span>
@@ -146,17 +147,17 @@ export default function CourseDetails() {
 
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-olive-800">{t('form_name')}</label>
-                      <input {...register('name')} placeholder={t('form_name_placeholder')} className="input-field" />
+                      <label className="mb-1.5 block text-sm font-medium text-olive-800">{tr('course_page', 'form_name')}</label>
+                      <input {...register('name')} placeholder={tr('course_page', 'form_name_placeholder')} className="input-field" />
                       {errors.name && <p className="mt-1 text-xs text-danger">Required</p>}
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-olive-800">{t('form_email')}</label>
+                      <label className="mb-1.5 block text-sm font-medium text-olive-800">{tr('course_page', 'form_email')}</label>
                       <input {...register('email')} type="email" placeholder="example@email.com" className="input-field" dir="ltr" />
                       {errors.email && <p className="mt-1 text-xs text-danger">Invalid</p>}
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-olive-800">{t('form_phone')}</label>
+                      <label className="mb-1.5 block text-sm font-medium text-olive-800">{tr('course_page', 'form_phone')}</label>
                       <input {...register('phone')} type="tel" placeholder="01XXXXXXXXX" className="input-field" dir="ltr" />
                       {errors.phone && <p className="mt-1 text-xs text-danger">Invalid</p>}
                     </div>
@@ -167,16 +168,16 @@ export default function CourseDetails() {
                     )}
                     <button type="submit" disabled={submitting} className="btn-primary w-full !py-3.5 text-base">
                       {submitting ? (
-                        <><Loader2 className="h-5 w-5 animate-spin" /><span>{t('form_processing')}</span></>
+                        <><Loader2 className="h-5 w-5 animate-spin" /><span>{tr('course_page', 'form_processing')}</span></>
                       ) : (
-                        <><CreditCard className="h-5 w-5" /><span>{t('form_pay')}</span></>
+                        <><CreditCard className="h-5 w-5" /><span>{tr('course_page', 'form_pay')}</span></>
                       )}
                     </button>
                   </form>
 
                   <div className="mt-4 flex items-center justify-center gap-2 text-xs text-olive-400">
                     <Shield className="h-3.5 w-3.5" />
-                    <span>{t('form_secure')}</span>
+                    <span>{tr('course_page', 'form_secure')}</span>
                   </div>
                 </div>
               </div>

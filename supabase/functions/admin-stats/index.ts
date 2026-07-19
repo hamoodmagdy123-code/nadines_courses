@@ -2,12 +2,12 @@ import {
   getSupabaseClient,
   jsonResp,
   errorResp,
-  corsHeaders,
+  getCorsHeaders,
 } from "../_shared/paymob.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: getCorsHeaders(req.headers.get("Origin")) });
   }
 
   try {

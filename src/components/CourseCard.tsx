@@ -3,6 +3,7 @@ import { formatPrice, getDisplayPrice } from '@/lib/pricing'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Check, Package, Layers, type LucideIcon } from 'lucide-react'
 import { useLang } from '@/i18n/context'
+import { useSC } from '@/hooks/useSiteContent'
 
 const ICON_MAP: Record<string, LucideIcon> = { Package, Layers }
 
@@ -39,7 +40,8 @@ const THEMES = {
 
 export function CourseCard({ course, countryCode, variant = 'primary' }: Props) {
   const price = getDisplayPrice(course, countryCode)
-  const { t, lang } = useLang()
+  const { lang } = useLang()
+  const { tr } = useSC()
   const title = lang === 'ar' ? course.title : course.title_en
   const desc = lang === 'ar' ? course.description : course.description_en
   const curriculum = lang === 'ar' ? course.curriculum : course.curriculum_en
@@ -100,7 +102,7 @@ export function CourseCard({ course, countryCode, variant = 'primary' }: Props) 
             ))}
             {curriculum.length > 3 && (
               <p className="text-xs text-olive-400 pl-5">
-                +{curriculum.length - 3} {t('courses_lessons')}
+                +{curriculum.length - 3} {tr('courses_header', 'lessons_label')}
               </p>
             )}
           </div>
@@ -122,7 +124,7 @@ export function CourseCard({ course, countryCode, variant = 'primary' }: Props) 
               to={`/course/${course.slug}`}
               className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 active:scale-[0.97] ${theme.btnBg}`}
             >
-              <span>{t('courses_details')}</span>
+              <span>{tr('courses_header', 'details_label')}</span>
               <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Link>
           </div>

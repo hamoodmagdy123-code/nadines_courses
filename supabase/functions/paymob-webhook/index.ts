@@ -2,12 +2,16 @@ import {
   getSupabaseClient,
   jsonResp,
   errorResp,
-  corsHeaders,
+  getCorsHeaders,
+  timingSafeEqual,
 } from "../_shared/paymob.ts";
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get("Origin");
+  const cors = getCorsHeaders(origin);
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: cors });
   }
 
   if (req.method !== "POST") {
@@ -17,24 +21,20 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const hmacParam = url.searchParams.get("hmac");
-    const rawBody = await req.text();
 
     if (!hmacParam) {
-      console.error("Webhook called without HMAC");
       return errorResp("Missing HMAC", 401);
     }
 
-    const body = JSON.parse(rawBody);
+    const body = await req.json();
     const obj = body.obj;
 
     if (!obj) {
-      console.error("Webhook missing obj field");
       return errorResp("Invalid payload", 400);
     }
 
     const hmacSecret = Deno.env.get("PAYMOB_HMAC_SECRET");
     if (!hmacSecret) {
-      console.error("PAYMOB_HMAC_SECRET not configured");
       return errorResp("HMAC secret not configured", 500);
     }
 
@@ -78,8 +78,7 @@ Deno.serve(async (req) => {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    if (computedHmac !== hmacParam) {
-      console.error("HMAC verification failed");
+    if (!timingSafeEqual(computedHmac, hmacParam)) {
       return errorResp("Invalid HMAC", 401);
     }
 
@@ -110,7 +109,6 @@ Deno.serve(async (req) => {
     }
 
     if (!order) {
-      console.error("Order not found:", paymobOrderId, specialRef);
       return jsonResp({ message: "Order not found" }, 200);
     }
 
@@ -138,7 +136,7 @@ Deno.serve(async (req) => {
       return jsonResp({ message: "Failed" });
     }
   } catch (err) {
-    console.error("paymob-webhook error:", err);
+    console.error("paymob-webhook error:", err instanceof Error ? err.message : "unknown");
     return jsonResp({ error: "Internal error" }, 500);
   }
 });
