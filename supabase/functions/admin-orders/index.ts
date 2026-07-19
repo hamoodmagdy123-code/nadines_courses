@@ -3,10 +3,9 @@ import {
   jsonResp,
   errorResp,
   corsHeaders,
-  serve,
 } from "../_shared/paymob.ts";
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
