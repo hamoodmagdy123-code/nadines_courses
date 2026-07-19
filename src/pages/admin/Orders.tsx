@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLang } from '@/i18n/context'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchAdminOrders, markTelegramAdded } from '@/lib/functions'
+import { fetchAdminOrders, markTelegramAdded, adminUpdateOrder } from '@/lib/functions'
 import {
   Search,
   Filter,
@@ -12,6 +12,9 @@ import {
   User,
   Mail,
   Loader2,
+  Trash2,
+  DollarSign,
+  Ban,
 } from 'lucide-react'
 
 export default function AdminOrders() {
@@ -25,7 +28,16 @@ export default function AdminOrders() {
     queryFn: () => fetchAdminOrders(filter !== 'all' ? { status: filter } : undefined),
   })
 
-  const mutation = useMutation({
+  const orderMutation = useMutation({
+    mutationFn: ({ orderId, action }: { orderId: string; action: 'mark_paid' | 'mark_failed' | 'delete' }) =>
+      adminUpdateOrder(orderId, action),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
+    },
+  })
+
+  const telegramMutation = useMutation({
     mutationFn: markTelegramAdded,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
@@ -58,6 +70,11 @@ export default function AdminOrders() {
     }
     return true
   })
+
+  const handleAction = (orderId: string, action: 'mark_paid' | 'mark_failed' | 'delete') => {
+    if (action === 'delete' && !confirm(t('admin_confirm_delete'))) return
+    orderMutation.mutate({ orderId, action })
+  }
 
   if (isLoading) {
     return (
@@ -114,6 +131,7 @@ export default function AdminOrders() {
               <th className="px-4 py-3">{t('admin_status')}</th>
               <th className="px-4 py-3">{t('admin_date')}</th>
               <th className="px-4 py-3">{t('admin_delivery')}</th>
+              <th className="px-4 py-3">{t('admin_actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-olive-50">
@@ -146,11 +164,11 @@ export default function AdminOrders() {
                   <td className="px-4 py-3">
                     {status === 'paid' && !order.telegram_added ? (
                       <button
-                        onClick={() => mutation.mutate(order.id as string)}
-                        disabled={mutation.isPending}
+                        onClick={() => telegramMutation.mutate(order.id as string)}
+                        disabled={telegramMutation.isPending}
                         className="rounded-lg bg-olive-50 px-3 py-1.5 text-xs font-medium text-olive-700 transition-colors hover:bg-olive-100 disabled:opacity-50"
                       >
-                        {mutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t('admin_mark_delivered')}
+                        {telegramMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t('admin_mark_delivered')}
                       </button>
                     ) : order.telegram_added ? (
                       <span className="inline-flex items-center gap-1 text-xs text-success">
@@ -160,6 +178,38 @@ export default function AdminOrders() {
                     ) : (
                       <span className="text-xs text-olive-400">—</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      {status !== 'paid' && (
+                        <button
+                          onClick={() => handleAction(order.id as string, 'mark_paid')}
+                          disabled={orderMutation.isPending}
+                          title={t('admin_mark_paid')}
+                          className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-success/10 hover:text-success disabled:opacity-50"
+                        >
+                          <DollarSign className="h-4 w-4" />
+                        </button>
+                      )}
+                      {status !== 'failed' && (
+                        <button
+                          onClick={() => handleAction(order.id as string, 'mark_failed')}
+                          disabled={orderMutation.isPending}
+                          title={t('admin_mark_failed')}
+                          className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-warning/10 hover:text-warning disabled:opacity-50"
+                        >
+                          <Ban className="h-4 w-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleAction(order.id as string, 'delete')}
+                        disabled={orderMutation.isPending}
+                        title={t('admin_delete_order')}
+                        className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )
@@ -203,20 +253,36 @@ export default function AdminOrders() {
                   <p className="text-xs text-olive-500">{course?.title || '—'}</p>
                   <p className="font-bold text-olive-800">{order.amount as number} {order.currency as string}</p>
                 </div>
-                {status === 'paid' && !order.telegram_added ? (
-                  <button
-                    onClick={() => mutation.mutate(order.id as string)}
-                    disabled={mutation.isPending}
-                    className="rounded-lg bg-olive-50 px-3 py-2 text-xs font-medium text-olive-700 transition-colors hover:bg-olive-100 disabled:opacity-50"
-                  >
-                    {mutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t('admin_mark_telegram')}
+                <div className="flex items-center gap-1">
+                  {status === 'paid' && !order.telegram_added && (
+                    <button
+                      onClick={() => telegramMutation.mutate(order.id as string)}
+                      disabled={telegramMutation.isPending}
+                      className="rounded-lg bg-olive-50 px-3 py-2 text-xs font-medium text-olive-700 transition-colors hover:bg-olive-100 disabled:opacity-50"
+                    >
+                      {telegramMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t('admin_mark_telegram')}
+                    </button>
+                  )}
+                  {order.telegram_added && (
+                    <span className="inline-flex items-center gap-1 text-xs text-success">
+                      <CheckCircle className="h-3 w-3" />
+                      {t('admin_delivered_done')}
+                    </span>
+                  )}
+                  {status !== 'paid' && (
+                    <button onClick={() => handleAction(order.id as string, 'mark_paid')} disabled={orderMutation.isPending} title={t('admin_mark_paid')} className="rounded-lg p-2 text-olive-400 hover:bg-success/10 hover:text-success disabled:opacity-50">
+                      <DollarSign className="h-4 w-4" />
+                    </button>
+                  )}
+                  {status !== 'failed' && (
+                    <button onClick={() => handleAction(order.id as string, 'mark_failed')} disabled={orderMutation.isPending} title={t('admin_mark_failed')} className="rounded-lg p-2 text-olive-400 hover:bg-warning/10 hover:text-warning disabled:opacity-50">
+                      <Ban className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button onClick={() => handleAction(order.id as string, 'delete')} disabled={orderMutation.isPending} title={t('admin_delete_order')} className="rounded-lg p-2 text-olive-400 hover:bg-danger/10 hover:text-danger disabled:opacity-50">
+                    <Trash2 className="h-4 w-4" />
                   </button>
-                ) : order.telegram_added ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-success">
-                    <CheckCircle className="h-3 w-3" />
-                    {t('admin_delivered_done')}
-                  </span>
-                ) : null}
+                </div>
               </div>
             </div>
           )

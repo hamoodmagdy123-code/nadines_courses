@@ -76,6 +76,19 @@ export async function updateCourse(course_id: string, updates: Record<string, un
   return res.json()
 }
 
+export async function adminUpdateOrder(order_id: string, action: 'mark_paid' | 'mark_failed' | 'delete') {
+  const res = await fetch(`${FUNCTIONS_BASE}/admin-update-order`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify({ order_id, action }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Request failed' }))
+    throw new Error(err.error || 'Failed to update order')
+  }
+  return res.json()
+}
+
 export async function fetchAdminStats() {
   const res = await fetch(`${FUNCTIONS_BASE}/admin-stats`, {
     headers: await getAuthHeaders(),
