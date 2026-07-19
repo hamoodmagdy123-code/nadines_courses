@@ -27,8 +27,8 @@ export default function AdminOrders() {
   })
 
   const orderMutation = useMutation({
-    mutationFn: ({ orderId, action }: { orderId: string; action: 'mark_paid' | 'mark_failed' | 'delete' }) =>
-      adminUpdateOrder(orderId, action),
+    mutationFn: ({ orderId }: { orderId: string }) =>
+      adminUpdateOrder(orderId, 'delete'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
@@ -69,9 +69,9 @@ export default function AdminOrders() {
     return true
   })
 
-  const handleAction = (orderId: string, action: 'delete') => {
-    if (action === 'delete' && !confirm(t('admin_confirm_delete'))) return
-    orderMutation.mutate({ orderId, action })
+  const handleDelete = (orderId: string) => {
+    if (!confirm(t('admin_confirm_delete'))) return
+    orderMutation.mutate({ orderId })
   }
 
   if (isLoading) {
@@ -179,7 +179,7 @@ export default function AdminOrders() {
                   </td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => handleAction(order.id as string, 'delete')}
+                      onClick={() => handleDelete(order.id as string)}
                       disabled={orderMutation.isPending}
                       title={t('admin_delete_order')}
                       className="rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-50"
@@ -245,7 +245,7 @@ export default function AdminOrders() {
                       {t('admin_delivered_done')}
                     </span>
                   )}
-                  <button onClick={() => handleAction(order.id as string, 'delete')} disabled={orderMutation.isPending} title={t('admin_delete_order')} className="rounded-lg p-2 text-olive-400 hover:bg-danger/10 hover:text-danger disabled:opacity-50">
+                  <button onClick={() => handleDelete(order.id as string)} disabled={orderMutation.isPending} title={t('admin_delete_order')} className="rounded-lg p-2 text-olive-400 hover:bg-danger/10 hover:text-danger disabled:opacity-50">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
