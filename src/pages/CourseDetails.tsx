@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useLang } from '@/i18n/context'
 import { useSC } from '@/hooks/useSiteContent'
 import { createOrder } from '@/lib/functions'
+import { useExchangeRates } from '@/hooks/useExchangeRates'
 import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, type LucideIcon } from 'lucide-react'
 
 const ICON_MAP: Record<string, LucideIcon> = { Package, Layers }
@@ -26,6 +27,7 @@ export default function CourseDetails() {
   const { slug } = useParams<{ slug: string }>()
   const { data: course, isLoading } = useCourseBySlug(slug || '')
   const { countryCode } = useGeo()
+  const { data: rates } = useExchangeRates()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { lang } = useLang()
@@ -83,7 +85,7 @@ export default function CourseDetails() {
   const title = lang === 'ar' ? course.title : course.title_en
   const desc = lang === 'ar' ? course.description : course.description_en
   const curriculum = lang === 'ar' ? course.curriculum : course.curriculum_en
-  const price = getDisplayPrice(course, countryCode)
+  const price = getDisplayPrice(course, countryCode, rates)
 
   return (
     <>
@@ -131,7 +133,7 @@ export default function CourseDetails() {
                     </p>
                     {!price.isEgypt && (
                       <p className="mt-1 text-sm text-olive-400">
-                        {tr('courses_header', 'pay_usd_label')} — {formatPrice(course.international_price_usd, 'USD')}
+                        {formatPrice(course.international_price_usd, 'USD')}
                       </p>
                     )}
                   </div>

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Check, Package, Layers, type LucideIcon } from 'lucide-react'
 import { useLang } from '@/i18n/context'
 import { useSC } from '@/hooks/useSiteContent'
+import { useExchangeRates } from '@/hooks/useExchangeRates'
 
 const ICON_MAP: Record<string, LucideIcon> = { Package, Layers }
 
@@ -39,7 +40,8 @@ const THEMES = {
 }
 
 export function CourseCard({ course, countryCode, variant = 'primary' }: Props) {
-  const price = getDisplayPrice(course, countryCode)
+  const { data: rates } = useExchangeRates()
+  const price = getDisplayPrice(course, countryCode, rates)
   const { lang } = useLang()
   const { tr } = useSC()
   const title = lang === 'ar' ? course.title : course.title_en
