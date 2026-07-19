@@ -263,7 +263,7 @@ export default function AdminOrders() {
                       {telegramMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t('admin_mark_telegram')}
                     </button>
                   )}
-                  {order.telegram_added && (
+                  {!!order.telegram_added && (
                     <span className="inline-flex items-center gap-1 text-xs text-success">
                       <CheckCircle className="h-3 w-3" />
                       {t('admin_delivered_done')}
