@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
 
     if (!order_id) return errorResp("Missing order_id");
 
-    // Check order exists and is paid
     const { data: order } = await supabase
       .from("orders")
       .select("status, telegram_added")
@@ -44,20 +43,24 @@ Deno.serve(async (req) => {
 
     if (!order) return errorResp("Order not found", 404);
     if (order.status !== "paid") return errorResp("Order is not paid");
-    if (order.telegram_added) return errorResp("Already marked as delivered");
+
+    const newStatus = !order.telegram_added;
 
     const { error: updateErr } = await supabase
       .from("orders")
       .update({
-        telegram_added: true,
-        telegram_added_at: new Date().toISOString(),
-        telegram_added_by: user.id,
+        telegram_added: newStatus,
+        telegram_added_at: newStatus ? new Date().toISOString() : null,
+        telegram_added_by: newStatus ? user.id : null,
       })
       .eq("id", order_id);
 
     if (updateErr) throw updateErr;
 
-    return jsonResp({ message: "Order marked as delivered on Telegram" });
+    return jsonResp({
+      message: newStatus ? "Marked as delivered" : "Delivery undone",
+      telegram_added: newStatus,
+    });
   } catch (err) {
     console.error("mark-telegram-added error:", err);
     return errorResp("Internal server error", 500);

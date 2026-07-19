@@ -160,19 +160,24 @@ export default function AdminOrders() {
                   </td>
                   <td className="px-4 py-3 text-sm text-olive-500">{new Date(order.created_at as string).toLocaleDateString()}</td>
                   <td className="px-4 py-3">
-                    {status === 'paid' && !order.telegram_added ? (
+                    {status === 'paid' ? (
                       <button
                         onClick={() => telegramMutation.mutate(order.id as string)}
                         disabled={telegramMutation.isPending}
-                        className="rounded-lg bg-olive-50 px-3 py-1.5 text-xs font-medium text-olive-700 transition-colors hover:bg-olive-100 disabled:opacity-50"
+                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                          order.telegram_added
+                            ? 'bg-success/10 text-success hover:bg-success/20'
+                            : 'bg-olive-50 text-olive-700 hover:bg-olive-100'
+                        }`}
                       >
-                        {telegramMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t('admin_mark_delivered')}
+                        {telegramMutation.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : order.telegram_added ? (
+                          <span className="flex items-center gap-1"><CheckCircle className="h-3 w-3" /> {t('admin_delivered_done')}</span>
+                        ) : (
+                          t('admin_mark_delivered')
+                        )}
                       </button>
-                    ) : order.telegram_added ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-success">
-                        <CheckCircle className="h-3 w-3" />
-                        {t('admin_delivered_done')}
-                      </span>
                     ) : (
                       <span className="text-xs text-olive-400">—</span>
                     )}
@@ -230,20 +235,18 @@ export default function AdminOrders() {
                   <p className="font-bold text-olive-800">{order.amount as number} {order.currency as string}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  {status === 'paid' && !order.telegram_added && (
+                  {status === 'paid' && (
                     <button
                       onClick={() => telegramMutation.mutate(order.id as string)}
                       disabled={telegramMutation.isPending}
-                      className="rounded-lg bg-olive-50 px-3 py-2 text-xs font-medium text-olive-700 transition-colors hover:bg-olive-100 disabled:opacity-50"
+                      className={`rounded-lg px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50 ${
+                        order.telegram_added
+                          ? 'bg-success/10 text-success hover:bg-success/20'
+                          : 'bg-olive-50 text-olive-700 hover:bg-olive-100'
+                      }`}
                     >
-                      {telegramMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t('admin_mark_telegram')}
+                      {telegramMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : order.telegram_added ? t('admin_delivered_done') : t('admin_mark_telegram')}
                     </button>
-                  )}
-                  {!!order.telegram_added && (
-                    <span className="inline-flex items-center gap-1 text-xs text-success">
-                      <CheckCircle className="h-3 w-3" />
-                      {t('admin_delivered_done')}
-                    </span>
                   )}
                   <button onClick={() => handleDelete(order.id as string)} disabled={orderMutation.isPending} title={t('admin_delete_order')} className="rounded-lg p-2 text-olive-400 hover:bg-danger/10 hover:text-danger disabled:opacity-50">
                     <Trash2 className="h-4 w-4" />
