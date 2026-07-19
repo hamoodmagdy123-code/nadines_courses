@@ -4,7 +4,7 @@ import { CourseCard } from '@/components/CourseCard'
 import { useCourses, useFAQ } from '@/hooks/useCourses'
 import { useSC } from '@/hooks/useSiteContent'
 import { useLang } from '@/i18n/context'
-import { Star, CheckCircle, MessageCircle, Shield, ChevronDown, Play, Eye, Users, Award } from 'lucide-react'
+import { Star, CheckCircle, MessageCircle, Shield, ChevronDown, Play, Eye, Users, Award, Quote } from 'lucide-react'
 import { useState } from 'react'
 
 function HeroSection() {
@@ -168,6 +168,53 @@ function TrustSection() {
   )
 }
 
+function TestimonialsSection() {
+  const { lang } = useLang()
+  const { get, tr } = useSC()
+  const section = get('testimonials')
+  const items = (section.items || []) as Array<{ name: string; text: { ar: string; en: string } }>
+
+  if (!items.length) return null
+
+  return (
+    <section className="bg-paper py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mb-14 text-center">
+          <h2 className="text-3xl font-bold text-olive-900 sm:text-4xl">{tr('testimonials', 'title')}</h2>
+          <p className="mx-auto mt-3 max-w-md text-olive-600/80">{tr('testimonials', 'subtitle')}</p>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item, i) => (
+            <div
+              key={i}
+              className="group relative rounded-2xl bg-white p-6 transition-all duration-300 hover:-translate-y-1 sm:rounded-3xl"
+              style={{ boxShadow: '0 1px 3px rgba(42,44,20,0.04), 0 8px 30px -8px rgba(63,66,31,0.12)' }}
+            >
+              <Quote className="mb-3 h-8 w-8 text-olive-200" />
+              <p className="mb-4 text-sm leading-relaxed text-olive-600 sm:text-base">
+                {lang === 'ar' ? item.text?.ar : item.text?.en}
+              </p>
+              <div className="flex items-center gap-3 border-t border-olive-100 pt-4">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-olive-100 text-sm font-bold text-olive-700">
+                  {item.name?.charAt(0) || '?'}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-olive-800">{item.name}</p>
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="h-3 w-3 fill-sticky-yellow text-sticky-yellow" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function FAQSection() {
   const { data: faqs = [] } = useFAQ()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -216,6 +263,7 @@ export default function Home() {
       <HeroSection />
       <TrustSection />
       <CoursesSection />
+      <TestimonialsSection />
       <FAQSection />
     </>
   )
