@@ -64,10 +64,15 @@ Deno.serve(async (req) => {
     }
 
     const isEgypt = country_code === "EG";
-    const currency = isEgypt ? "EGP" : "USD";
     const amount = isEgypt
       ? Number(course.egypt_price)
       : Number(course.international_price_usd);
+
+    // Always charge EGP through Paymob (integration only supports EGP)
+    // Convert USD display price to EGP at fixed rate of 50 EGP per 1 USD
+    const USD_TO_EGP = 50;
+    const chargeAmount = isEgypt ? amount : Math.round(amount * USD_TO_EGP);
+    const currency = "EGP";
 
     const { data: order, error: orderErr } = await supabase
       .from("orders")
@@ -78,7 +83,7 @@ Deno.serve(async (req) => {
         customer_phone: phone || null,
         country_code: country_code || null,
         currency,
-        amount,
+        amount: chargeAmount,
         status: "pending",
       })
       .select()
@@ -105,7 +110,7 @@ Deno.serve(async (req) => {
       state: "Cairo",
     };
 
-    const amountCents = Math.round(amount * 100);
+    const amountCents = Math.round(chargeAmount * 100);
 
     const intention = await paymobCreateIntention({
       secretKey,
@@ -129,7 +134,7 @@ Deno.serve(async (req) => {
     return jsonResp({
       order_id: order.id,
       checkout_url: checkoutUrl,
-      amount,
+      amount: chargeAmount,
       currency,
     });
   } catch (err) {
