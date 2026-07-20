@@ -4,6 +4,7 @@ import { useLang } from '@/i18n/context'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAllCourses } from '@/hooks/useCourses'
 import { updateCourse, createCourse, deleteCourse } from '@/lib/functions'
+import { ConfirmModal } from '@/components/ConfirmModal'
 
 const ICON_MAP: Record<string, LucideIcon> = { Package, Layers }
 
@@ -36,6 +37,7 @@ export default function AdminCourses() {
   const [edits, setEdits] = useState<Record<string, Record<string, unknown>>>({})
   const [showCreate, setShowCreate] = useState(false)
   const [newCourse, setNewCourse] = useState<CourseForm>(EMPTY_FORM)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const updateMutation = useMutation({
     mutationFn: ({ id, ...updates }: { id: string; [key: string]: unknown }) => updateCourse(id, updates),
@@ -74,8 +76,7 @@ export default function AdminCourses() {
     updateMutation.mutate({ id: course.id, ...courseEdits })
   }
   const handleDelete = (id: string) => {
-    if (!confirm('Delete this course? This cannot be undone.')) return
-    deleteMutation.mutate(id)
+    setDeleteId(id)
   }
   const handleCreate = () => {
     createMutation.mutate({
@@ -285,6 +286,17 @@ export default function AdminCourses() {
           )
         })}
       </div>
+
+      <ConfirmModal
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null) } }}
+        title="Delete Course"
+        message="This course will be permanently deleted. This cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        loading={deleteMutation.isPending}
+      />
     </div>
   )
 }

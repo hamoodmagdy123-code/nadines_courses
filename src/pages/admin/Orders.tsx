@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLang } from '@/i18n/context'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchAdminOrders, markTelegramAdded, adminUpdateOrder } from '@/lib/functions'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import {
   Search,
   Filter,
@@ -69,6 +70,20 @@ export default function AdminOrders() {
 
   const orders = data?.orders || []
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null)
+  const [confirmTitle, setConfirmTitle] = useState('')
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const [confirmVariant, setConfirmVariant] = useState<'danger' | 'warning' | 'info'>('warning')
+
+  const openConfirm = (title: string, message: string, variant: 'danger' | 'warning' | 'info', action: () => void) => {
+    setConfirmTitle(title)
+    setConfirmMessage(message)
+    setConfirmVariant(variant)
+    setConfirmAction(() => action)
+    setConfirmOpen(true)
+  }
+
   const STATUS_CONFIG = {
     paid: { icon: CheckCircle, label: t('admin_paid'), color: 'bg-success/10 text-success' },
     pending: { icon: Clock, label: t('admin_pending'), color: 'bg-warning/10 text-warning' },
@@ -95,18 +110,30 @@ export default function AdminOrders() {
   })
 
   const handleArchive = (orderId: string) => {
-    if (!confirm(t('admin_confirm_archive'))) return
-    archiveMutation.mutate({ orderId })
+    openConfirm(
+      t('admin_archive_order'),
+      t('admin_confirm_archive'),
+      'warning',
+      () => archiveMutation.mutate({ orderId })
+    )
   }
 
   const handleRestore = (orderId: string) => {
-    if (!confirm(t('admin_confirm_restore'))) return
-    restoreMutation.mutate({ orderId })
+    openConfirm(
+      t('admin_restore_order'),
+      t('admin_confirm_restore'),
+      'info',
+      () => restoreMutation.mutate({ orderId })
+    )
   }
 
   const handlePermanentDelete = (orderId: string) => {
-    if (!confirm(t('admin_confirm_permanent_delete'))) return
-    permanentDeleteMutation.mutate({ orderId })
+    openConfirm(
+      t('admin_permanent_delete'),
+      t('admin_confirm_permanent_delete'),
+      'danger',
+      () => permanentDeleteMutation.mutate({ orderId })
+    )
   }
 
   if (isLoading) {
@@ -350,6 +377,17 @@ export default function AdminOrders() {
           <p className="mt-3 text-olive-500">{showArchived ? t('admin_no_orders') : t('admin_no_orders')}</p>
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => { confirmAction?.(); setConfirmOpen(false) }}
+        title={confirmTitle}
+        message={confirmMessage}
+        variant={confirmVariant}
+        confirmLabel={confirmVariant === 'danger' ? 'Delete' : 'Confirm'}
+        loading={archiveMutation.isPending || restoreMutation.isPending || permanentDeleteMutation.isPending}
+      />
     </div>
   )
 }
