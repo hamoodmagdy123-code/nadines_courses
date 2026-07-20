@@ -31,8 +31,11 @@ export default function Dashboard() {
   }
 
   const totalOrders = stats?.total_orders || 0
-  const egyptPct = totalOrders > 0 ? 70 : 0
-  const intlPct = totalOrders > 0 ? 30 : 0
+  const paidOrders = stats?.paid_orders || 0
+  const egyptCount = stats?.egypt_count || 0
+  const intlCount = paidOrders - egyptCount
+  const egyptPct = paidOrders > 0 ? Math.round((egyptCount / paidOrders) * 100) : 0
+  const intlPct = paidOrders > 0 ? Math.round((intlCount / paidOrders) * 100) : 0
 
   const statCards = [
     {
@@ -114,7 +117,7 @@ export default function Dashboard() {
             <div>
               <div className="mb-2 flex justify-between text-sm">
                 <span className="font-medium text-olive-600">{t('admin_egypt')}</span>
-                <span className="font-bold text-olive-800">—</span>
+                <span className="font-bold text-olive-800">{egyptCount} ({egyptPct}%)</span>
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-olive-100/80">
                 <div className="h-full rounded-full bg-gradient-to-r from-olive-500 to-olive-600 transition-all duration-700" style={{ width: `${egyptPct}%` }} />
@@ -123,7 +126,7 @@ export default function Dashboard() {
             <div>
               <div className="mb-2 flex justify-between text-sm">
                 <span className="font-medium text-olive-600">{t('admin_international')}</span>
-                <span className="font-bold text-olive-800">—</span>
+                <span className="font-bold text-olive-800">{intlCount} ({intlPct}%)</span>
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-olive-100/80">
                 <div className="h-full rounded-full bg-gradient-to-r from-sticky-yellow to-sticky-yellowDark transition-all duration-700" style={{ width: `${intlPct}%` }} />

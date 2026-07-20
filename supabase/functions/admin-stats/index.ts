@@ -79,6 +79,13 @@ Deno.serve(async (req) => {
       .eq("status", "paid")
       .not("telegram_added", "eq", true);
 
+    // Egypt vs International distribution (from paid orders)
+    const { count: egyptOrders } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "paid")
+      .eq("country_code", "EG");
+
     // Orders by course
     const { data: courseOrders } = await supabase
       .from("orders")
@@ -99,6 +106,7 @@ Deno.serve(async (req) => {
       pending_orders: pendingOrders || 0,
       delivered_count: deliveredCount || 0,
       delivery_pending: deliveryPendingCount || 0,
+      egypt_count: egyptOrders || 0,
       total_revenue_egp: totalRevenueEGP,
       total_revenue_usd: totalRevenueUSD,
       course_stats: courseStats,
