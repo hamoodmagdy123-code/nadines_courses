@@ -138,7 +138,7 @@ function HeroSection() {
               <div className="absolute bottom-[5%] right-[3%] h-[85%] w-[85%] rounded-full bg-olive-200/60" />
             </div>
             <img
-              src={tr('hero', 'image_url') || '/nadines.webp'}
+              src="/nadines.webp"
               alt="Nadine"
               className="relative z-10 mx-auto w-full rounded-[1.25rem] sm:rounded-[1.75rem] transition-transform duration-700 hover:scale-[1.02]"
               style={{ boxShadow: '0 25px 60px -15px rgba(42,44,20,0.45)' }}
