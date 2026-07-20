@@ -65,19 +65,19 @@ Deno.serve(async (req) => {
           .reduce((sum, o) => sum + Number(o.amount), 0)
       : 0;
 
-    // Telegram delivery status (delivered = paid + telegram_added)
+    // Telegram delivery status (delivered = paid + telegram_added = true)
     const { count: deliveredCount } = await supabase
       .from("orders")
       .select("*", { count: "exact", head: true })
       .eq("status", "paid")
       .eq("telegram_added", true);
 
-    // Paid but NOT yet delivered
+    // Paid but NOT yet delivered (telegram_added is false OR null)
     const { count: deliveryPendingCount } = await supabase
       .from("orders")
       .select("*", { count: "exact", head: true })
       .eq("status", "paid")
-      .eq("telegram_added", false);
+      .not("telegram_added", "eq", true);
 
     // Orders by course
     const { data: courseOrders } = await supabase
