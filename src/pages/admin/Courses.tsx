@@ -19,15 +19,64 @@ interface CourseForm {
   image_url: string
   icon: string
   sort_order: number
-  curriculum: string
-  curriculum_en: string
+  curriculum: string[]
+  curriculum_en: string[]
 }
 
 const EMPTY_FORM: CourseForm = {
   title: '', title_en: '', description: '', description_en: '',
   slug: '', egypt_price: 0, international_price_usd: 0,
   image_url: '/nadines.webp', icon: 'Package', sort_order: 0,
-  curriculum: '', curriculum_en: '',
+  curriculum: [], curriculum_en: [],
+}
+
+function CurriculumEditor({
+  items,
+  onChange,
+  label,
+}: {
+  items: string[]
+  onChange: (items: string[]) => void
+  label: string
+}) {
+  const update = (i: number, val: string) => {
+    const next = [...items]
+    next[i] = val
+    onChange(next)
+  }
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{label}</label>
+      <div className="space-y-1.5">
+        {items.map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-olive-100 text-[10px] font-bold text-olive-500">
+              {i + 1}
+            </span>
+            <input
+              value={item}
+              onChange={(e) => update(i, e.target.value)}
+              placeholder="Curriculum item..."
+              className="input-field !py-2"
+            />
+            <button
+              onClick={() => onChange(items.filter((_, idx) => idx !== i))}
+              className="shrink-0 rounded-lg p-1.5 text-olive-300 transition-all duration-200 hover:bg-danger/10 hover:text-danger"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => onChange([...items, ''])}
+        className="btn-ghost !text-olive-600 !text-xs"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        <span>Add item</span>
+      </button>
+    </div>
+  )
 }
 
 export default function AdminCourses() {
@@ -35,16 +84,34 @@ export default function AdminCourses() {
   const queryClient = useQueryClient()
   const { data: courses = [], isLoading } = useAllCourses()
   const [edits, setEdits] = useState<Record<string, Record<string, unknown>>>({})
+  const [dirtyCourses, setDirtyCourses] = useState<Set<string>>(new Set())
   const [showCreate, setShowCreate] = useState(false)
   const [newCourse, setNewCourse] = useState<CourseForm>(EMPTY_FORM)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, ...updates }: { id: string; [key: string]: unknown }) => updateCourse(id, updates),
+  const markDirty = (courseId: string) => {
+    setDirtyCourses((prev) => {
+      if (prev.has(courseId)) return prev
+      const next = new Set(prev)
+      next.add(courseId)
+      return next
+    })
+  }
+
+  const saveAllMutation = useMutation({
+    mutationFn: async () => {
+      const promises = Array.from(dirtyCourses).map((courseId) => {
+        const courseEdits = edits[courseId]
+        if (!courseEdits) return Promise.resolve()
+        return updateCourse(courseId, courseEdits)
+      })
+      await Promise.all(promises)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses-all'] })
       queryClient.invalidateQueries({ queryKey: ['courses'] })
       setEdits({})
+      setDirtyCourses(new Set())
     },
   })
 
@@ -68,12 +135,8 @@ export default function AdminCourses() {
 
   const getEdit = (id: string, field: string, original: unknown) => edits[id]?.[field] ?? original
   const updateEdit = (id: string, field: string, value: unknown) => {
+    markDirty(id)
     setEdits((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), [field]: value } }))
-  }
-  const handleSave = (course: { id: string }) => {
-    const courseEdits = edits[course.id]
-    if (!courseEdits) return
-    updateMutation.mutate({ id: course.id, ...courseEdits })
   }
   const handleDelete = (id: string) => {
     setDeleteId(id)
@@ -81,10 +144,12 @@ export default function AdminCourses() {
   const handleCreate = () => {
     createMutation.mutate({
       ...newCourse,
-      curriculum: newCourse.curriculum ? newCourse.curriculum.split('\n').filter(Boolean) : [],
-      curriculum_en: newCourse.curriculum_en ? newCourse.curriculum_en.split('\n').filter(Boolean) : [],
+      curriculum: newCourse.curriculum.filter(Boolean),
+      curriculum_en: newCourse.curriculum_en.filter(Boolean),
     })
   }
+
+  const hasChanges = dirtyCourses.size > 0
 
   if (isLoading) {
     return (
@@ -104,10 +169,25 @@ export default function AdminCourses() {
           <h1 className="text-2xl font-extrabold text-olive-800 tracking-tight">{t('admin_manage_courses')}</h1>
           <p className="mt-1 text-olive-500">{t('admin_manage_courses_sub')}</p>
         </div>
-        <button onClick={() => setShowCreate(!showCreate)} className="btn-primary !gap-1.5">
-          <Plus className="h-4 w-4" />
-          <span>{t('admin_add')}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {hasChanges && (
+            <button
+              onClick={() => saveAllMutation.mutate()}
+              disabled={saveAllMutation.isPending}
+              className="btn-primary !gap-1.5 disabled:opacity-40"
+            >
+              {saveAllMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              <span>{t('admin_save_all')}</span>
+              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/30 text-[10px] font-bold">
+                {dirtyCourses.size}
+              </span>
+            </button>
+          )}
+          <button onClick={() => setShowCreate(!showCreate)} className="btn-primary !gap-1.5">
+            <Plus className="h-4 w-4" />
+            <span>{t('admin_add')}</span>
+          </button>
+        </div>
       </div>
 
       {showCreate && (
@@ -162,13 +242,19 @@ export default function AdminCourses() {
               <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">Description (EN)</label>
               <textarea value={newCourse.description_en} onChange={(e) => setNewCourse({ ...newCourse, description_en: e.target.value })} className="input-field" rows={2} />
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">Curriculum (AR) — one per line</label>
-              <textarea value={newCourse.curriculum} onChange={(e) => setNewCourse({ ...newCourse, curriculum: e.target.value })} className="input-field" rows={4} />
+            <div className="sm:col-span-2">
+              <CurriculumEditor
+                items={newCourse.curriculum}
+                onChange={(items) => setNewCourse({ ...newCourse, curriculum: items })}
+                label="Curriculum (AR)"
+              />
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">Curriculum (EN) — one per line</label>
-              <textarea value={newCourse.curriculum_en} onChange={(e) => setNewCourse({ ...newCourse, curriculum_en: e.target.value })} className="input-field" rows={4} />
+            <div className="sm:col-span-2">
+              <CurriculumEditor
+                items={newCourse.curriculum_en}
+                onChange={(items) => setNewCourse({ ...newCourse, curriculum_en: items })}
+                label="Curriculum (EN)"
+              />
             </div>
           </div>
           <div className="mt-5 flex justify-end gap-2">
@@ -185,15 +271,19 @@ export default function AdminCourses() {
       <div className="space-y-5">
         {courses.map((course) => {
           const CI = ICON_MAP[course.icon] || Package
+          const isDirty = dirtyCourses.has(course.id)
           return (
-            <div key={course.id} className="admin-card p-6">
+            <div key={course.id} className={`admin-card p-6 transition-all duration-200 ${isDirty ? 'ring-2 ring-amber-300/60' : ''}`}>
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-olive-100 transition-all duration-200 group-hover:bg-olive-200">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-olive-100">
                     <CI className="h-5 w-5 text-olive-600" strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-olive-800">{course.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-olive-800">{course.title}</h3>
+                      {isDirty && <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" title="Unsaved changes" />}
+                    </div>
                     <p className="text-sm text-olive-500">/{course.slug}</p>
                   </div>
                 </div>
@@ -240,22 +330,16 @@ export default function AdminCourses() {
               </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">Curriculum (AR) — one per line</label>
-                  <textarea
-                    value={getEdit(course.id, 'curriculum', (course.curriculum || []).join('\n')) as string}
-                    onChange={(e) => updateEdit(course.id, 'curriculum', e.target.value.split('\n').filter(Boolean))}
-                    className="input-field" rows={4}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">Curriculum (EN) — one per line</label>
-                  <textarea
-                    value={getEdit(course.id, 'curriculum_en', (course.curriculum_en || []).join('\n')) as string}
-                    onChange={(e) => updateEdit(course.id, 'curriculum_en', e.target.value.split('\n').filter(Boolean))}
-                    className="input-field" rows={4}
-                  />
-                </div>
+                <CurriculumEditor
+                  items={(getEdit(course.id, 'curriculum', course.curriculum || []) as string[])}
+                  onChange={(items) => updateEdit(course.id, 'curriculum', items)}
+                  label="Curriculum (AR)"
+                />
+                <CurriculumEditor
+                  items={(getEdit(course.id, 'curriculum_en', course.curriculum_en || []) as string[])}
+                  onChange={(items) => updateEdit(course.id, 'curriculum_en', items)}
+                  label="Curriculum (EN)"
+                />
               </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -278,18 +362,26 @@ export default function AdminCourses() {
                     onChange={(e) => updateEdit(course.id, 'sort_order', Number(e.target.value))} className="input-field" dir="ltr" />
                 </div>
               </div>
-
-              <div className="mt-5 flex justify-end">
-                <button onClick={() => handleSave(course)} disabled={!edits[course.id] || updateMutation.isPending}
-                  className="btn-primary !gap-1.5 disabled:opacity-50">
-                  {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  <span>{t('admin_save')}</span>
-                </button>
-              </div>
             </div>
           )
         })}
       </div>
+
+      {hasChanges && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+          <button
+            onClick={() => saveAllMutation.mutate()}
+            disabled={saveAllMutation.isPending}
+            className="btn-primary !gap-2 !rounded-2xl !px-6 !py-3 !text-sm shadow-lg shadow-olive-900/20"
+          >
+            {saveAllMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            <span>{saveAllMutation.isPending ? 'Saving...' : t('admin_save_all')}</span>
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/30 text-[10px] font-bold">
+              {dirtyCourses.size}
+            </span>
+          </button>
+        </div>
+      )}
 
       <ConfirmModal
         open={!!deleteId}

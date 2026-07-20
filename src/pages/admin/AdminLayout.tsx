@@ -9,6 +9,8 @@ import {
   GraduationCap,
   Menu,
   X,
+  Globe,
+  Home,
 } from 'lucide-react'
 import { useLang } from '@/i18n/context'
 import { useAuth } from '@/hooks/useAuth'
@@ -29,6 +31,7 @@ export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { t } = useLang()
   const { user, loading, signOut } = useAuth()
+  const { lang, setLang } = useLang()
   const NAV_ITEMS = AdminNavItems()
 
   if (loading) {
@@ -104,7 +107,21 @@ export function AdminLayout() {
             })}
           </nav>
 
-          <div className="border-t border-olive-100/60 p-3">
+          <div className="border-t border-olive-100/60 p-3 space-y-1">
+            <Link
+              to="/"
+              className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-olive-600 transition-all duration-200 hover:bg-olive-50 hover:text-olive-800"
+            >
+              <Home className="h-5 w-5" />
+              <span>{t('admin_nav_home')}</span>
+            </Link>
+            <button
+              onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+              className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-olive-600 transition-all duration-200 hover:bg-olive-50 hover:text-olive-800"
+            >
+              <Globe className="h-5 w-5" />
+              <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
+            </button>
             <button
               onClick={async () => {
                 await signOut()
