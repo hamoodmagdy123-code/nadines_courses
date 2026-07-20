@@ -65,8 +65,15 @@ Deno.serve(async (req) => {
           .reduce((sum, o) => sum + Number(o.amount), 0)
       : 0;
 
-    // Telegram delivery status
-    const { count: deliveredOrders } = await supabase
+    // Telegram delivery status (delivered = paid + telegram_added)
+    const { count: deliveredCount } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "paid")
+      .eq("telegram_added", true);
+
+    // Paid but NOT yet delivered
+    const { count: deliveryPendingCount } = await supabase
       .from("orders")
       .select("*", { count: "exact", head: true })
       .eq("status", "paid")
@@ -90,7 +97,8 @@ Deno.serve(async (req) => {
       total_orders: totalOrders || 0,
       paid_orders: paidOrders || 0,
       pending_orders: pendingOrders || 0,
-      delivered_pending: deliveredOrders || 0,
+      delivered_count: deliveredCount || 0,
+      delivery_pending: deliveryPendingCount || 0,
       total_revenue_egp: totalRevenueEGP,
       total_revenue_usd: totalRevenueUSD,
       course_stats: courseStats,

@@ -66,6 +66,7 @@ export default function AdminOrders() {
     mutationFn: markTelegramAdded,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
     },
   })
 
@@ -258,7 +259,7 @@ export default function AdminOrders() {
                           ) : order.telegram_added ? (
                             <span className="flex items-center gap-1"><CheckCircle className="h-3 w-3" /> {t('admin_delivered_done')}</span>
                           ) : (
-                            t('admin_mark_delivered')
+                            t('admin_mark_telegram')
                           )}
                         </button>
                       ) : (

@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Clock,
   Loader2,
+  Package,
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -61,10 +62,18 @@ export default function Dashboard() {
     {
       icon: CheckCircle,
       label: t('admin_delivered'),
-      value: stats?.paid_orders || 0,
+      value: stats?.delivered_count || 0,
       color: 'from-success/15 to-success/5',
       iconColor: 'text-success',
       iconBg: 'bg-success/10',
+    },
+    {
+      icon: Package,
+      label: t('admin_delivery_pending'),
+      value: stats?.delivery_pending || 0,
+      color: 'from-warning/15 to-warning/5',
+      iconColor: 'text-warning',
+      iconBg: 'bg-warning/10',
     },
   ]
 
@@ -75,7 +84,7 @@ export default function Dashboard() {
         <p className="mt-1 text-olive-500">{t('admin_overview')}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {statCards.map(({ icon: Icon, label, value, color, iconColor, iconBg }, i) => (
           <div key={i} className="admin-stat-card group">
             <div className={`absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br ${color} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
