@@ -18,7 +18,7 @@ export function Navbar() {
     <>
       <div className="fixed top-0 inset-x-0 z-50 flex justify-center px-3 pt-3 sm:px-4 sm:pt-4">
         <nav
-          className={`flex w-full max-w-3xl items-center justify-between gap-2 rounded-xl px-3 py-2 transition-all duration-500 sm:px-5 sm:py-2.5 ${
+          className={`flex w-full max-w-3xl items-center justify-between gap-2 rounded-xl px-3 py-2 transition-colors duration-500 sm:px-5 sm:py-2.5 ${
             scrolled
               ? 'glass glass-scrolled'
               : 'bg-white/50 backdrop-blur-xl border border-white/30'

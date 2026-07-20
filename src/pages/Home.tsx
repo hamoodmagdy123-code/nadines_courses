@@ -80,12 +80,12 @@ function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-olive-500 pt-24 pb-16 sm:pt-28 sm:pb-20">
       <div className="hero-mesh pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-0">
-        <div className="float-orb absolute left-[10%] top-[15%] h-3 w-3 rounded-full bg-sticky-yellow/60" />
-        <div className="float-orb absolute right-[15%] top-[25%] h-2 w-2 rounded-full bg-olive-300/50" />
-        <div className="float-orb absolute left-[60%] top-[10%] h-4 w-4 rounded-full bg-sticky-yellow/40" />
-        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-sticky-yellow/[0.06] blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-olive-300/[0.08] blur-[150px]" />
+        <div className="pointer-events-none absolute inset-0">
+        <div className="float-orb absolute left-[10%] top-[15%] h-3 w-3 rounded-full bg-sticky-yellow/60 hidden sm:block" />
+        <div className="float-orb absolute right-[15%] top-[25%] h-2 w-2 rounded-full bg-olive-300/50 hidden sm:block" />
+        <div className="float-orb absolute left-[60%] top-[10%] h-4 w-4 rounded-full bg-sticky-yellow/40 hidden sm:block" />
+        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-sticky-yellow/[0.06] blur-[120px] hidden sm:block" />
+        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-olive-300/[0.08] blur-[150px] hidden sm:block" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
@@ -134,7 +134,7 @@ function HeroSection() {
 
           <div className="relative mx-auto mt-10 w-full max-w-[280px] sm:max-w-sm lg:mt-0">
             <div className="absolute inset-0 -z-10">
-              <div className="absolute left-[5%] top-[3%] h-[80%] w-[80%] rounded-full bg-sticky-yellow/40 blur-[3px]" />
+              <div className="absolute left-[5%] top-[3%] h-[80%] w-[80%] rounded-full bg-sticky-yellow/40 hidden sm:block sm:blur-[3px]" />
               <div className="absolute bottom-[5%] right-[3%] h-[85%] w-[85%] rounded-full bg-olive-200/60" />
             </div>
             <img
@@ -210,8 +210,8 @@ function TrustSection() {
     <section className="relative overflow-hidden py-20 pb-28 sm:py-24 sm:pb-32">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-olive-500 via-olive-500/95 to-olive-500" />
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sticky-yellow/10 blur-[60px]" />
-        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-olive-300/15 blur-[50px]" />
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sticky-yellow/10 blur-[60px] hidden sm:block" />
+        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-olive-300/15 blur-[50px] hidden sm:block" />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -265,8 +265,8 @@ function CoursesSection() {
     <section id="courses" className="relative overflow-hidden py-20 pb-28 sm:py-28 sm:pb-36">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-olive-50 via-paper to-olive-100/60" />
-        <div className="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-sticky-yellow/10 blur-[100px]" />
-        <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-olive-200/15 blur-[100px]" />
+        <div className="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-sticky-yellow/10 blur-[100px] hidden sm:block" />
+        <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-olive-200/15 blur-[100px] hidden sm:block" />
       </div>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <RevealSection>
@@ -343,8 +343,8 @@ function TestimonialsSection() {
   return (
     <section className="relative overflow-hidden bg-paper-dim py-20 pb-28 sm:py-28 sm:pb-36">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute right-1/4 top-0 h-72 w-72 rounded-full bg-sticky-yellow/5 blur-[80px]" />
-        <div className="absolute left-1/4 bottom-0 h-56 w-56 rounded-full bg-olive-200/10 blur-[60px]" />
+        <div className="absolute right-1/4 top-0 h-72 w-72 rounded-full bg-sticky-yellow/5 blur-[80px] hidden sm:block" />
+        <div className="absolute left-1/4 bottom-0 h-56 w-56 rounded-full bg-olive-200/10 blur-[60px] hidden sm:block" />
       </div>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <RevealSection>
@@ -407,8 +407,8 @@ function FAQSection() {
   return (
     <section id="faq" className="relative overflow-hidden py-20 pb-28 sm:py-28 sm:pb-36">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-paper-dim to-paper" />
-      <div className="absolute -right-32 top-1/4 h-48 w-48 rounded-full bg-sticky-yellow/[0.06] blur-[60px]" />
-      <div className="absolute -left-20 bottom-1/4 h-40 w-40 rounded-full bg-olive-200/[0.08] blur-[50px]" />
+      <div className="absolute -right-32 top-1/4 h-48 w-48 rounded-full bg-sticky-yellow/[0.06] blur-[60px] hidden sm:block" />
+      <div className="absolute -left-20 bottom-1/4 h-40 w-40 rounded-full bg-olive-200/[0.08] blur-[50px] hidden sm:block" />
 
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <RevealSection>
@@ -469,10 +469,10 @@ function CTASection() {
       <div className="absolute inset-0 -z-10 bg-olive-500" />
       <div className="hero-mesh pointer-events-none absolute inset-0 opacity-50" />
       <div className="pointer-events-none absolute inset-0">
-        <div className="float-orb absolute left-[15%] top-[20%] h-3 w-3 rounded-full bg-sticky-yellow/50" />
-        <div className="float-orb absolute right-[20%] bottom-[30%] h-2 w-2 rounded-full bg-sticky-yellow/40" />
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sticky-yellow/[0.08] blur-[80px]" />
-        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-olive-300/[0.1] blur-[60px]" />
+        <div className="float-orb absolute left-[15%] top-[20%] h-3 w-3 rounded-full bg-sticky-yellow/50 hidden sm:block" />
+        <div className="float-orb absolute right-[20%] bottom-[30%] h-2 w-2 rounded-full bg-sticky-yellow/40 hidden sm:block" />
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sticky-yellow/[0.08] blur-[80px] hidden sm:block" />
+        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-olive-300/[0.1] blur-[60px] hidden sm:block" />
       </div>
 
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
