@@ -19,6 +19,13 @@
   font-display: swap;
   src: url('/fonts/Caveat-latin.woff2') format('woff2');
 }
+@font-face {
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/Cairo-arabic.woff2') format('woff2');
+}
 @import "tailwindcss";
 
 @theme {
@@ -139,6 +146,10 @@
 @layer base {
   html {
     scroll-behavior: auto;
+  }
+  html[lang="ar"] {
+    --font-display: "Cairo", sans-serif;
+    --font-body: "Cairo", sans-serif;
   }
   body {
     background-color: var(--color-paper);
