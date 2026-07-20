@@ -4,77 +4,142 @@ import { CourseCard } from '@/components/CourseCard'
 import { useCourses, useFAQ } from '@/hooks/useCourses'
 import { useSC } from '@/hooks/useSiteContent'
 import { useLang } from '@/i18n/context'
-import { Star, CheckCircle, MessageCircle, Shield, ChevronDown, Play, Eye, Users, Award, Quote } from 'lucide-react'
-import { useState } from 'react'
+import {
+  Star, CheckCircle, MessageCircle, Shield, ChevronDown,
+  Play, Eye, Users, Award, Quote, Sparkles, ArrowLeft,
+  Zap, Heart, GraduationCap, Send,
+} from '@/components/icons'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
+
+function useReveal(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect() } },
+      { threshold }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [threshold])
+
+  return { ref, visible }
+}
+
+function RevealSection({
+  children,
+  className = '',
+  delay = 0,
+}: {
+  children: ReactNode
+  className?: string
+  delay?: number
+}) {
+  const { ref, visible } = useReveal()
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-[900ms] cubic-bezier(0.16,1,0.3,1] ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  )
+}
 
 function HeroSection() {
   const { t, lang } = useLang()
   const { tr } = useSC()
 
   return (
-    <section className="relative overflow-hidden bg-olive-500 pt-24 pb-28 sm:pt-28 sm:pb-32">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.07]">
-        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-sticky-yellow blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-olive-300 blur-[150px]" />
+    <section className="relative overflow-hidden bg-olive-500 pt-24 pb-16 sm:pt-28 sm:pb-20">
+      <div className="hero-mesh pointer-events-none absolute inset-0" />
+      <div className="pointer-events-none absolute inset-0">
+        <div className="float-orb absolute left-[10%] top-[15%] h-3 w-3 rounded-full bg-sticky-yellow/60" />
+        <div className="float-orb absolute right-[15%] top-[25%] h-2 w-2 rounded-full bg-olive-300/50" />
+        <div className="float-orb absolute left-[60%] top-[10%] h-4 w-4 rounded-full bg-sticky-yellow/40" />
+        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-sticky-yellow/[0.06] blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-olive-300/[0.08] blur-[150px]" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-        <div
-          className="overflow-hidden rounded-[2rem] bg-paper/95 p-6 pb-20 sm:p-10 sm:pb-24 lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 lg:p-14 lg:pb-28"
-          style={{ boxShadow: 'var(--shadow-hero)' }}
+        <div className="overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-paper/[0.97] p-5 sm:p-8 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 lg:p-12"
+          style={{ boxShadow: '0 30px 80px -20px rgba(42,44,20,0.5), 0 0 0 1px rgba(255,255,255,0.15) inset' }}
         >
           <div className={`text-center ${lang === 'ar' ? 'lg:text-right' : 'lg:text-left'}`}>
             <div className="animate-fade-in-up">
-              <span className="sticky-note sticky-note-2 mb-6 inline-flex text-sm sm:text-base">
+              <span className="sticky-note sticky-note-2 mb-5 inline-flex text-xs sm:text-sm">
                 {tr('hero', 'badge')}
               </span>
             </div>
-            <h1 className="animate-fade-in-up animation-delay-100 text-3xl font-bold leading-[1.2] text-olive-900 sm:text-4xl lg:text-[2.75rem]">
+
+            <h1 className="animate-fade-in-up animation-delay-100 text-[1.75rem] font-extrabold leading-[1.12] text-olive-900 sm:text-4xl lg:text-[2.75rem] tracking-tight">
               {tr('hero', 'title')}
             </h1>
-            <p className={`animate-fade-in-up animation-delay-200 mx-auto mt-5 max-w-md text-base leading-relaxed text-olive-600 sm:text-lg ${lang === 'ar' ? 'lg:mx-0' : 'lg:ml-0 lg:mr-auto'}`}>
+
+            <p className={`animate-fade-in-up animation-delay-200 mx-auto mt-4 max-w-sm text-sm leading-relaxed text-olive-600 sm:mt-5 sm:max-w-md sm:text-base lg:text-lg ${lang === 'ar' ? 'lg:mx-0' : 'lg:ml-0 lg:mr-auto'}`}>
               {tr('hero', 'subtitle')}
             </p>
-            <div className={`animate-fade-in-up animation-delay-300 mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row ${lang === 'ar' ? 'lg:justify-start' : 'lg:justify-start'}`}>
-              <a href="#courses" className="btn-primary !px-8 !py-4 !text-sm sm:!text-base">
+
+            <div className={`animate-fade-in-up animation-delay-300 mt-6 flex flex-col items-center gap-3 sm:mt-8 sm:flex-row sm:gap-4 ${lang === 'ar' ? 'lg:justify-start' : 'lg:justify-start'}`}>
+              <a href="#courses" className="btn-primary btn-shimmer !px-7 !py-3.5 !text-sm sm:!px-8 sm:!py-4 sm:!text-base !rounded-xl w-full sm:w-auto">
                 {tr('hero', 'cta')}
               </a>
-              <a href="#faq" className="group inline-flex items-center gap-3 text-sm font-semibold text-olive-700 transition-colors hover:text-olive-900">
-                <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-olive-50 transition-all duration-300 group-hover:bg-olive-100 group-hover:scale-110">
-                  <span className="absolute inset-0 rounded-full bg-olive-200/50 animate-pulse" />
+              <a href="#faq" className="group inline-flex items-center gap-2.5 text-sm font-semibold text-olive-700 transition-colors hover:text-olive-900">
+                <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-olive-50 transition-all duration-300 group-hover:bg-olive-100 group-hover:scale-110 group-hover:shadow-md">
+                  <span className="absolute inset-0 rounded-full bg-olive-200/40 animate-pulse" />
                   <Play className="relative h-4 w-4 fill-olive-700 text-olive-700" />
                 </span>
                 {t('nav_faq')}
               </a>
             </div>
+
+            <div className={`animate-fade-in-up animation-delay-400 mt-5 flex items-center gap-3 sm:mt-6 ${lang === 'ar' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-start'}`}>
+              <div className="flex -space-x-2 rtl:space-x-reverse">
+                {[0,1,2].map(i => (
+                  <div key={i} className="h-7 w-7 rounded-full border-2 border-paper bg-gradient-to-br from-olive-200 to-olive-300 shadow-sm" style={{ zIndex: 3-i }} />
+                ))}
+              </div>
+              <p className="text-xs font-medium text-olive-500">
+                {lang === 'ar' ? '+200 طالب سعيد' : '+200 happy students'}
+              </p>
+            </div>
           </div>
 
-          <div className="relative mx-auto mt-14 w-full max-w-sm lg:mt-0">
+          <div className="relative mx-auto mt-10 w-full max-w-[280px] sm:max-w-sm lg:mt-0">
             <div className="absolute inset-0 -z-10">
-              <div className="absolute left-[8%] top-[5%] h-[75%] w-[75%] rounded-full bg-sticky-yellow/60 blur-[2px]" />
-              <div className="absolute bottom-[8%] right-[5%] h-[80%] w-[80%] rounded-full bg-olive-200/80" />
+              <div className="absolute left-[5%] top-[3%] h-[80%] w-[80%] rounded-full bg-sticky-yellow/40 blur-[3px]" />
+              <div className="absolute bottom-[5%] right-[3%] h-[85%] w-[85%] rounded-full bg-olive-200/60" />
             </div>
             <img
               src={tr('hero', 'image_url') || '/nadines.png'}
               alt="Nadine"
-              className="relative z-10 mx-auto w-full rounded-[1.5rem] sm:rounded-[2rem]"
-              style={{ boxShadow: '0 20px 60px -15px rgba(42,44,20,0.4)' }}
+              className="relative z-10 mx-auto w-full rounded-[1.25rem] sm:rounded-[1.75rem] transition-transform duration-700 hover:scale-[1.02]"
+              style={{ boxShadow: '0 25px 60px -15px rgba(42,44,20,0.45)' }}
               loading="eager"
             />
-            <div className="animate-fade-in-up animation-delay-500 absolute bottom-4 right-0 z-20 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 sm:right-2"
+            <div className="animate-fade-in-up animation-delay-500 absolute -bottom-3 right-0 z-20 flex items-center gap-2.5 rounded-xl bg-white/95 backdrop-blur-sm px-3.5 py-2.5 sm:-bottom-4 sm:right-2 sm:rounded-2xl sm:px-4 sm:py-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
               style={{ boxShadow: '0 8px 30px -8px rgba(42,44,20,0.2)' }}
             >
-              <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-olive-200 to-olive-300" />
+              <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-olive-200 to-olive-300 shadow-inner sm:h-10 sm:w-10" />
               <div className={lang === 'ar' ? 'text-right' : 'text-left'}>
-                <p className="text-sm font-bold text-olive-900">{tr('hero', 'instructor_name')}</p>
-                <p className="text-xs text-olive-500">{tr('hero', 'instructor_label')}</p>
+                <p className="text-xs font-bold text-olive-900 sm:text-sm">{tr('hero', 'instructor_name')}</p>
+                <p className="text-[10px] text-olive-500 sm:text-xs">{tr('hero', 'instructor_label')}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats bar */}
         <StatsBar />
+      </div>
+
+      <div className="absolute bottom-0 left-0 z-10 w-full" style={{ lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="block h-8 w-full sm:h-12 lg:h-14">
+          <path d="M0,20 C240,60 480,0 720,30 C960,60 1200,10 1440,25 L1440,60 L0,60 Z" fill="#7C8050" />
+        </svg>
       </div>
     </section>
   )
@@ -89,52 +154,26 @@ function StatsBar() {
   if (!stats.length) return null
 
   return (
-    <div className="relative z-10 mx-auto -mt-8 max-w-4xl px-4 sm:-mt-10 sm:px-6">
-      <div className="grid grid-cols-3 gap-4 rounded-2xl bg-white p-5 shadow-card sm:p-7">
+    <RevealSection className="relative z-10 mx-auto -mt-8 max-w-3xl px-4 sm:-mt-10 sm:px-6">
+      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/95 backdrop-blur-sm p-4 sm:p-6 sm:gap-5"
+        style={{ boxShadow: '0 15px 50px -15px rgba(42,44,20,0.15), 0 0 0 1px rgba(255,255,255,0.6) inset' }}
+      >
         {stats.map((s, i) => {
           const Icon = icons[i] || Eye
           return (
-            <div key={i} className="flex items-center justify-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sticky-yellow/60 text-olive-800">
-                <Icon className="h-5 w-5" />
+            <div key={i} className="flex items-center justify-center gap-2 sm:gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sticky-yellow/40 to-sticky-yellow/20 text-olive-800 sm:h-10 sm:w-10 sm:rounded-xl">
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </span>
               <div className={lang === 'ar' ? 'text-right' : 'text-left'}>
-                <p className="text-lg font-bold text-olive-900 sm:text-xl">{s.value}</p>
-                <p className="text-xs text-olive-500">{lang === 'ar' ? s.label?.ar : s.label?.en}</p>
+                <p className="text-base font-extrabold text-olive-900 sm:text-xl">{s.value}</p>
+                <p className="text-[10px] text-olive-500 sm:text-xs">{lang === 'ar' ? s.label?.ar : s.label?.en}</p>
               </div>
             </div>
           )
         })}
       </div>
-    </div>
-  )
-}
-
-function CoursesSection() {
-  const { countryCode } = useGeo()
-  const { tr } = useSC()
-  const { data: courses = [] } = useCourses()
-
-  return (
-    <section id="courses" className="relative overflow-hidden py-24">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-olive-50 via-paper to-olive-100/60" />
-        <div className="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-sticky-yellow/15 blur-[100px]" />
-        <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-olive-200/20 blur-[100px]" />
-      </div>
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-14 text-center">
-          <span className="sticky-note sticky-note-2 mb-5 inline-flex">{tr('courses_header', 'badge')}</span>
-          <h2 className="text-3xl font-bold text-olive-900 sm:text-4xl">{tr('courses_header', 'title')}</h2>
-          <p className="mx-auto mt-3 max-w-md text-olive-600/80">{tr('courses_header', 'subtitle')}</p>
-        </div>
-        <div className="space-y-8">
-          {courses.map((course, i) => (
-            <CourseCard key={course.id} course={course} countryCode={countryCode} variant={i === 0 ? 'primary' : 'secondary'} />
-          ))}
-        </div>
-      </div>
-    </section>
+    </RevealSection>
   )
 }
 
@@ -145,24 +184,100 @@ function TrustSection() {
   const icons = [Shield, MessageCircle, CheckCircle, Star]
 
   return (
-    <section className="bg-olive-50 py-20">
+    <section className="relative overflow-hidden py-20 pb-28 sm:py-24 sm:pb-32">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-olive-500 via-olive-500/95 to-olive-500" />
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sticky-yellow/10 blur-[60px]" />
+        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-olive-300/15 blur-[50px]" />
+      </div>
+
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
+        <RevealSection>
+          <div className="mb-10 text-center sm:mb-14">
+            <h2 className="text-2xl font-extrabold text-white sm:text-3xl tracking-tight">
+              {lang === 'ar' ? 'ليه تختارنا؟' : 'Why Choose Us?'}
+            </h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-white/60 sm:text-base">
+              {lang === 'ar' ? 'بنقدملك الأفضل في التعليم الرقمي' : 'We deliver the best in digital education'}
+            </p>
+          </div>
+        </RevealSection>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {items.map((item, i) => {
             const Icon = icons[i] || Star
             return (
-              <div key={i} className="group flex flex-col items-center gap-3 rounded-2xl bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 sm:rounded-3xl sm:p-6"
-                style={{ boxShadow: '0 1px 3px rgba(42,44,20,0.04), 0 8px 30px -8px rgba(63,66,31,0.12)' }}
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-olive-100 text-olive-600 transition-all duration-300 group-hover:bg-olive-200 group-hover:scale-110">
-                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+              <RevealSection key={i} delay={i * 100}>
+                <div className="group relative overflow-hidden rounded-2xl bg-white/[0.08] backdrop-blur-sm p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:bg-white/[0.14] sm:rounded-3xl sm:p-6 border border-white/[0.08] hover:border-white/[0.15]"
+                >
+                  <div className="absolute inset-x-0 top-0 h-[2px] scale-x-0 bg-gradient-to-r from-sticky-yellow/60 via-sticky-yellow to-sticky-yellow/60 transition-transform duration-500 group-hover:scale-x-100" />
+                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.1] text-white/80 transition-all duration-300 group-hover:bg-white/[0.18] group-hover:scale-110 sm:h-12 sm:w-12">
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </div>
+                  <p className="mt-3 text-xs font-bold text-white sm:text-sm">{lang === 'ar' ? item.label?.ar : item.label?.en}</p>
+                  {item.sub && <p className="mt-1 text-[10px] text-white/50 sm:text-xs leading-relaxed">{lang === 'ar' ? item.sub?.ar : item.sub?.en}</p>}
                 </div>
-                <p className="font-semibold text-olive-900">{lang === 'ar' ? item.label?.ar : item.label?.en}</p>
-                {item.sub && <p className="text-xs text-olive-500 sm:text-sm">{lang === 'ar' ? item.sub?.ar : item.sub?.en}</p>}
-              </div>
+              </RevealSection>
             )
           })}
         </div>
+      </div>
+
+      <div className="absolute bottom-0 left-0 z-10 w-full" style={{ lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="block h-8 w-full sm:h-12 lg:h-14">
+          <path d="M0,30 C360,60 720,0 1080,35 C1260,50 1380,20 1440,15 L1440,60 L0,60 Z" fill="#F3F4E9" />
+        </svg>
+      </div>
+    </section>
+  )
+}
+
+function CoursesSection() {
+  const { countryCode } = useGeo()
+  const { tr } = useSC()
+  const { data: courses = [] } = useCourses()
+  const { lang } = useLang()
+
+  return (
+    <section id="courses" className="relative overflow-hidden py-20 pb-28 sm:py-28 sm:pb-36">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-olive-50 via-paper to-olive-100/60" />
+        <div className="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-sticky-yellow/10 blur-[100px]" />
+        <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-olive-200/15 blur-[100px]" />
+      </div>
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <RevealSection>
+          <div className="mb-12 text-center sm:mb-16">
+            <span className="sticky-note sticky-note-2 mb-4 inline-flex text-xs sm:text-sm">{tr('courses_header', 'badge')}</span>
+            <h2 className="text-2xl font-extrabold text-olive-900 sm:text-4xl tracking-tight">{tr('courses_header', 'title')}</h2>
+            <p className="mx-auto mt-3 max-w-md text-sm text-olive-600/80 sm:text-base">{tr('courses_header', 'subtitle')}</p>
+          </div>
+        </RevealSection>
+
+        <div className="space-y-6 sm:space-y-8">
+          {courses.map((course, i) => (
+            <RevealSection key={course.id} delay={i * 150}>
+              <CourseCard course={course} countryCode={countryCode} variant={i === 0 ? 'primary' : 'secondary'} />
+            </RevealSection>
+          ))}
+        </div>
+
+        {courses.length === 0 && (
+          <RevealSection>
+            <div className="py-12 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-olive-100/60">
+                <GraduationCap className="h-8 w-8 text-olive-400" />
+              </div>
+              <p className="text-olive-500 font-medium">{lang === 'ar' ? 'الكورسات قادمة قريباً' : 'Courses coming soon'}</p>
+            </div>
+          </RevealSection>
+        )}
+      </div>
+
+      <div className="absolute bottom-0 left-0 z-10 w-full" style={{ lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="block h-8 w-full sm:h-12 lg:h-14">
+          <path d="M0,25 C240,0 480,55 720,20 C960,55 1200,5 1440,30 L1440,60 L0,60 Z" fill="#F3EEDC" />
+        </svg>
       </div>
     </section>
   )
@@ -177,39 +292,58 @@ function TestimonialsSection() {
   if (!items.length) return null
 
   return (
-    <section className="bg-paper py-24">
+    <section className="relative overflow-hidden bg-paper-dim py-20 pb-28 sm:py-28 sm:pb-36">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute right-1/4 top-0 h-72 w-72 rounded-full bg-sticky-yellow/5 blur-[80px]" />
+        <div className="absolute left-1/4 bottom-0 h-56 w-56 rounded-full bg-olive-200/10 blur-[60px]" />
+      </div>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-14 text-center">
-          <h2 className="text-3xl font-bold text-olive-900 sm:text-4xl">{tr('testimonials', 'title')}</h2>
-          <p className="mx-auto mt-3 max-w-md text-olive-600/80">{tr('testimonials', 'subtitle')}</p>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <RevealSection>
+          <div className="mb-12 text-center sm:mb-16">
+            <div className="mb-3 inline-flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-sticky-yellowDark sm:h-5 sm:w-5" />
+              <span className="text-xs font-semibold text-olive-500 uppercase tracking-wider sm:text-sm">{tr('testimonials', 'subtitle')}</span>
+              <Sparkles className="h-4 w-4 text-sticky-yellowDark sm:h-5 sm:w-5" />
+            </div>
+            <h2 className="text-2xl font-extrabold text-olive-900 sm:text-4xl tracking-tight">{tr('testimonials', 'title')}</h2>
+          </div>
+        </RevealSection>
+
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {items.map((item, i) => (
-            <div
-              key={i}
-              className="group relative rounded-2xl bg-white p-6 transition-all duration-300 hover:-translate-y-1 sm:rounded-3xl"
-              style={{ boxShadow: '0 1px 3px rgba(42,44,20,0.04), 0 8px 30px -8px rgba(63,66,31,0.12)' }}
-            >
-              <Quote className="mb-3 h-8 w-8 text-olive-200" />
-              <p className="mb-4 text-sm leading-relaxed text-olive-600 sm:text-base">
-                {lang === 'ar' ? item.text?.ar : item.text?.en}
-              </p>
-              <div className="flex items-center gap-3 border-t border-olive-100 pt-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-olive-100 text-sm font-bold text-olive-700">
-                  {item.name?.charAt(0) || '?'}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-olive-800">{item.name}</p>
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="h-3 w-3 fill-sticky-yellow text-sticky-yellow" />
-                    ))}
+            <RevealSection key={i} delay={i * 80}>
+              <div
+                className="group relative overflow-hidden rounded-2xl bg-white/70 backdrop-blur-sm p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-white sm:rounded-3xl sm:p-6 border border-olive-100/30 hover:border-olive-200/60"
+                style={{ boxShadow: '0 1px 3px rgba(42,44,20,0.04), 0 8px 30px -8px rgba(63,66,31,0.08)' }}
+              >
+                <div className="absolute -right-3 -top-3 h-20 w-20 rounded-full bg-olive-50/60 transition-all duration-500 group-hover:scale-150 group-hover:bg-olive-100/30" />
+                <Quote className="relative mb-3 h-6 w-6 text-sticky-yellow/70 sm:h-7 sm:w-7" />
+                <p className="relative mb-4 text-sm leading-relaxed text-olive-600 sm:mb-5 sm:text-[15px]">
+                  {lang === 'ar' ? item.text?.ar : item.text?.en}
+                </p>
+                <div className="relative flex items-center gap-3 border-t border-olive-100/60 pt-3.5 sm:pt-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-olive-100 to-olive-200 text-xs font-bold text-olive-700 shadow-sm sm:h-10 sm:w-10 sm:text-sm">
+                    {item.name?.charAt(0) || '?'}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-olive-800 sm:text-sm">{item.name}</p>
+                    <div className="mt-0.5 flex gap-0.5">
+                      {[...Array(5)].map((_, j) => (
+                        <Star key={j} className="h-2.5 w-2.5 fill-sticky-yellow text-sticky-yellow sm:h-3 sm:w-3" />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </RevealSection>
           ))}
         </div>
+      </div>
+
+      <div className="absolute bottom-0 left-0 z-10 w-full" style={{ lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="block h-8 w-full sm:h-12 lg:h-14">
+          <path d="M0,35 C180,10 360,50 540,25 C720,55 900,5 1080,30 C1260,50 1380,15 1440,20 L1440,60 L0,60 Z" fill="#FBF8EF" />
+        </svg>
       </div>
     </section>
   )
@@ -222,35 +356,133 @@ function FAQSection() {
   const { tr } = useSC()
 
   return (
-    <section id="faq" className="bg-paper py-24">
+    <section id="faq" className="relative overflow-hidden py-20 pb-28 sm:py-28 sm:pb-36">
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-paper-dim to-paper" />
+      <div className="absolute -right-32 top-1/4 h-48 w-48 rounded-full bg-sticky-yellow/[0.06] blur-[60px]" />
+      <div className="absolute -left-20 bottom-1/4 h-40 w-40 rounded-full bg-olive-200/[0.08] blur-[50px]" />
+
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
-        <div className="mb-14 text-center">
-          <h2 className="text-3xl font-bold text-olive-900 sm:text-4xl">{tr('faq', 'title') || 'FAQ'}</h2>
-        </div>
-        <div className="space-y-3">
+        <RevealSection>
+          <div className="mb-10 text-center sm:mb-14">
+            <h2 className="text-2xl font-extrabold text-olive-900 sm:text-4xl tracking-tight">{tr('faq', 'title') || 'FAQ'}</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-olive-500/80 sm:mt-3">
+              {lang === 'ar' ? 'إجابات على الأسئلة الشائعة' : 'Answers to common questions'}
+            </p>
+          </div>
+        </RevealSection>
+
+        <div className="space-y-2.5 sm:space-y-3">
           {faqs.map((faq, i) => {
             const q = lang === 'ar' ? faq.question : faq.question_en
             const a = lang === 'ar' ? faq.answer : faq.answer_en
+            const isOpen = openIndex === i
             return (
-              <div key={i} className="overflow-hidden rounded-2xl border border-olive-100/80 bg-white transition-all duration-300 hover:shadow-md">
-                <button
-                  onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                  className={`flex w-full items-center justify-between p-5 text-right font-semibold text-olive-800 transition-colors hover:bg-olive-50/50 sm:p-6 ${lang === 'ar' ? '' : 'text-left'}`}
-                >
-                  <span className="text-sm sm:text-base">{q}</span>
-                  <ChevronDown className={`h-5 w-5 shrink-0 text-olive-400 transition-transform duration-300 ${openIndex === i ? 'rotate-180' : ''}`} />
-                </button>
-                <div className={`grid transition-all duration-300 ease-in-out ${openIndex === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
-                  <div className="overflow-hidden">
-                    <p className={`px-5 pb-6 leading-relaxed text-olive-600 sm:px-6 sm:text-sm ${lang === 'ar' ? '' : 'ml-6 mr-5 sm:ml-6 sm:mr-6'}`}>
-                      {a}
-                    </p>
+              <RevealSection key={i} delay={i * 60}>
+                <div className={`overflow-hidden rounded-xl border bg-white transition-all duration-300 sm:rounded-2xl ${isOpen ? 'border-olive-200 shadow-elevated' : 'border-olive-100/50 hover:border-olive-200/60 hover:shadow-soft'}`}>
+                  <button
+                    onClick={() => setOpenIndex(isOpen ? null : i)}
+                    className={`flex w-full items-center justify-between gap-3 p-4 text-right font-semibold text-olive-800 transition-colors duration-200 sm:p-5 ${isOpen ? 'bg-olive-50/30' : 'hover:bg-olive-50/20'} ${lang === 'ar' ? '' : 'text-left'}`}
+                  >
+                    <span className="text-xs sm:text-sm leading-relaxed">{q}</span>
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ${isOpen ? 'bg-olive-100 rotate-180' : 'bg-olive-50'}`}>
+                      <ChevronDown className="h-4 w-4 text-olive-500" />
+                    </span>
+                  </button>
+                  <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+                    <div className="overflow-hidden">
+                      <p className={`px-4 pb-5 leading-relaxed text-olive-600 sm:px-5 sm:pb-6 sm:text-sm ${lang === 'ar' ? '' : 'ml-5 mr-4 sm:ml-5 sm:mr-5'}`}>
+                        {a}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </RevealSection>
             )
           })}
         </div>
+      </div>
+
+      <div className="absolute bottom-0 left-0 z-10 w-full" style={{ lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="block h-8 w-full sm:h-12 lg:h-14">
+          <path d="M0,20 C480,55 960,5 1440,30 L1440,60 L0,60 Z" fill="#7C8050" />
+        </svg>
+      </div>
+    </section>
+  )
+}
+
+function CTASection() {
+  const { lang } = useLang()
+  const { tr } = useSC()
+
+  return (
+    <section className="relative overflow-hidden py-20 sm:py-28">
+      <div className="absolute inset-0 -z-10 bg-olive-500" />
+      <div className="hero-mesh pointer-events-none absolute inset-0 opacity-50" />
+      <div className="pointer-events-none absolute inset-0">
+        <div className="float-orb absolute left-[15%] top-[20%] h-3 w-3 rounded-full bg-sticky-yellow/50" />
+        <div className="float-orb absolute right-[20%] bottom-[30%] h-2 w-2 rounded-full bg-sticky-yellow/40" />
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sticky-yellow/[0.08] blur-[80px]" />
+        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-olive-300/[0.1] blur-[60px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
+        <RevealSection>
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/[0.1] px-4 py-1.5 text-xs font-semibold text-sticky-yellow backdrop-blur-sm border border-white/[0.08] sm:text-sm">
+            <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            {lang === 'ar' ? 'ابدأ رحلتك' : 'Start Your Journey'}
+          </span>
+        </RevealSection>
+
+        <RevealSection delay={100}>
+          <h2 className="mt-4 text-2xl font-extrabold text-white sm:text-3xl lg:text-4xl tracking-tight">
+            {tr('cta', 'title') || (lang === 'ar' ? 'جاهز تبدأ؟' : 'Ready to Start?')}
+          </h2>
+        </RevealSection>
+
+        <RevealSection delay={200}>
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
+            {tr('cta', 'subtitle') || (lang === 'ar' ? 'انضم لطلابنا وابدأ تتعلم مع نادين' : 'Join our students and start learning with Nadine')}
+          </p>
+        </RevealSection>
+
+        <RevealSection delay={300}>
+          <div className="mt-7 flex flex-col items-center gap-3 sm:mt-8 sm:flex-row sm:justify-center sm:gap-4">
+            <a
+              href="#courses"
+              className="cta-glow inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-white px-7 py-3.5 text-sm font-bold text-olive-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg sm:w-auto sm:px-8 sm:py-4 sm:text-base"
+            >
+              {tr('cta', 'btn') || (lang === 'ar' ? 'شوف الكورسات' : 'View Courses')}
+              <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+            </a>
+            <a
+              href="#faq"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.06] px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.12] hover:border-white/30 sm:w-auto sm:px-8 sm:py-4"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {lang === 'ar' ? 'اسأل سؤالك' : 'Ask a Question'}
+            </a>
+          </div>
+        </RevealSection>
+
+        <RevealSection delay={400}>
+          <div className="mt-8 flex items-center justify-center gap-4 text-xs text-white/40 sm:mt-10">
+            <span className="flex items-center gap-1.5">
+              <Heart className="h-3 w-3 fill-white/30" />
+              {lang === 'ar' ? '+200 طالب' : '+200 students'}
+            </span>
+            <span className="h-1 w-1 rounded-full bg-white/20" />
+            <span className="flex items-center gap-1.5">
+              <Star className="h-3 w-3 fill-sticky-yellow/60" />
+              {lang === 'ar' ? 'تقييم ممتاز' : 'Top rated'}
+            </span>
+            <span className="h-1 w-1 rounded-full bg-white/20" />
+            <span className="flex items-center gap-1.5">
+              <Send className="h-3 w-3" />
+              {lang === 'ar' ? 'تسليم فوري' : 'Instant delivery'}
+            </span>
+          </div>
+        </RevealSection>
       </div>
     </section>
   )
@@ -265,6 +497,7 @@ export default function Home() {
       <CoursesSection />
       <TestimonialsSection />
       <FAQSection />
+      <CTASection />
     </>
   )
 }

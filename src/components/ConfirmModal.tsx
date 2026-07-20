@@ -1,4 +1,4 @@
-import { AlertTriangle, Trash2, Info, X } from 'lucide-react'
+import { AlertTriangle, Trash2, Info, X } from '@/components/icons'
 import { useEffect } from 'react'
 
 interface ConfirmModalProps {
@@ -61,18 +61,18 @@ export function ConfirmModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-olive-900/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm animate-fade-in-up rounded-2xl bg-white p-6 shadow-xl"
-        style={{ boxShadow: '0 20px 60px -15px rgba(42,44,20,0.25)' }}>
+      <div className="absolute inset-0 bg-olive-900/40 backdrop-blur-md" onClick={onClose} style={{ backdropFilter: 'blur(12px) saturate(120%)' }} />
+      <div className="relative w-full max-w-sm animate-fade-in-scale rounded-2xl bg-white p-7"
+        style={{ boxShadow: '0 25px 60px -15px rgba(42,44,20,0.3), 0 0 0 1px rgba(228,230,203,0.3)' }}>
         <button
           onClick={onClose}
-          className="absolute left-3 top-3 rounded-lg p-1.5 text-olive-400 transition-colors hover:bg-olive-100 hover:text-olive-600"
+          className="absolute left-3 top-3 rounded-xl p-1.5 text-olive-400 transition-all duration-200 hover:bg-olive-100 hover:text-olive-600 hover:scale-110"
         >
           <X className="h-4 w-4" />
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-full ${v.iconBg}`}>
+          <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${v.iconBg} transition-transform duration-300`}>
             <Icon className={`h-7 w-7 ${v.iconColor}`} />
           </div>
           <h3 className="text-lg font-bold text-olive-900">{title}</h3>
@@ -83,14 +83,14 @@ export function ConfirmModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 rounded-xl border border-olive-200 px-4 py-2.5 text-sm font-medium text-olive-700 transition-colors hover:bg-olive-50 disabled:opacity-50"
+            className="flex-1 rounded-xl border border-olive-200 bg-white px-4 py-2.5 text-sm font-medium text-olive-700 transition-all duration-200 hover:bg-olive-50 hover:border-olive-300 disabled:opacity-50 active:scale-[0.98]"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-medium text-white transition-all active:scale-[0.97] disabled:opacity-50 ${v.btnBg}`}
+            className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 active:scale-[0.97] disabled:opacity-50 hover:shadow-lg ${v.btnBg}`}
           >
             {loading ? '...' : confirmLabel}
           </button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Save, Loader2, Plus, Trash2 } from 'lucide-react'
+import { Save, Loader2, Plus, Trash2, ChevronDown } from '@/components/icons'
 import { useLang } from '@/i18n/context'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -20,22 +20,40 @@ function SectionEditor({
   children,
   onSave,
   isPending,
+  defaultOpen = false,
 }: {
   title: string
   children: React.ReactNode
   onSave: () => void
   isPending: boolean
+  defaultOpen?: boolean
 }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+
   return (
-    <div className="card p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-olive-800">{title}</h2>
-        <button onClick={onSave} disabled={isPending} className="btn-primary !gap-1.5 !text-xs">
-          {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-          <span>Save</span>
-        </button>
-      </div>
-      {children}
+    <div className="admin-card overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between p-5 text-left transition-colors duration-200 hover:bg-olive-50/30"
+      >
+        <h2 className="text-base font-bold text-olive-800">{title}</h2>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={(e) => { e.stopPropagation(); onSave(); }}
+            disabled={isPending}
+            className="btn-primary !gap-1.5 !text-xs !rounded-lg"
+          >
+            {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+            <span>Save</span>
+          </button>
+          <ChevronDown className={`h-4 w-4 text-olive-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
+      </button>
+      {isOpen && (
+        <div className="border-t border-olive-100/60 p-5">
+          {children}
+        </div>
+      )}
     </div>
   )
 }
@@ -131,7 +149,10 @@ export default function AdminContent() {
   if (isLoading || Object.keys(local).length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
+          <p className="text-sm text-olive-400">...</p>
+        </div>
       </div>
     )
   }
@@ -139,17 +160,16 @@ export default function AdminContent() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-olive-800">{t('admin_content')}</h1>
+        <h1 className="text-2xl font-extrabold text-olive-800 tracking-tight">{t('admin_content')}</h1>
         <p className="mt-1 text-olive-500">{t('admin_content_sub')}</p>
       </div>
 
-      <div className="space-y-6">
-        {/* Hero Section */}
-        <SectionEditor title="Hero Section" onSave={() => saveSection.mutate({ key: 'hero', content: local.hero || {} })} isPending={saveSection.isPending}>
+      <div className="space-y-4">
+        <SectionEditor title="Hero Section" onSave={() => saveSection.mutate({ key: 'hero', content: local.hero || {} })} isPending={saveSection.isPending} defaultOpen>
           <div className="grid gap-4 sm:grid-cols-2">
             {['badge', 'title', 'subtitle', 'cta', 'instructor_name', 'instructor_label'].map((field) => (
-              <div key={field} className="space-y-1">
-                <label className="text-xs font-medium text-olive-500 capitalize">{field.replace(/_/g, ' ')}</label>
+              <div key={field} className="space-y-1.5">
+                <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{field.replace(/_/g, ' ')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <TrInput label="AR" value={((local.hero as Record<string, Record<string, string>>)?.[field])?.ar || ''} onChange={(v) => updateTrField('hero', field, 'ar', v)} />
                   <TrInput label="EN" value={((local.hero as Record<string, Record<string, string>>)?.[field])?.en || ''} onChange={(v) => updateTrField('hero', field, 'en', v)} />
@@ -159,14 +179,13 @@ export default function AdminContent() {
           </div>
         </SectionEditor>
 
-        {/* Stats Section */}
         <SectionEditor title="Stats Section" onSave={() => saveSection.mutate({ key: 'stats', content: local.stats || [] })} isPending={saveSection.isPending}>
           <div className="space-y-3">
             {(Array.isArray(local.stats) ? local.stats : []).map((s: unknown, i: number) => {
               const stat = s as Record<string, unknown>
               const label = (stat.label || {}) as Record<string, string>
               return (
-              <div key={i} className="flex items-center gap-3 rounded-xl bg-olive-50 p-3">
+              <div key={i} className="flex items-center gap-3 rounded-xl bg-olive-50/60 p-3 border border-olive-100/40">
                 <input value={stat.value as string} onChange={(e) => {
                   const next = [...((Array.isArray(local.stats) ? local.stats : []) as Record<string, unknown>[])]
                   next[i] = { ...next[i], value: e.target.value }
@@ -176,7 +195,7 @@ export default function AdminContent() {
                   <TrInput label="AR" value={label.ar || ''} onChange={(v) => updateArrayItem('stats', i, 'label', 'ar', v)} />
                   <TrInput label="EN" value={label.en || ''} onChange={(v) => updateArrayItem('stats', i, 'label', 'en', v)} />
                 </div>
-                <button onClick={() => removeArrayItem('stats', i)} className="self-start rounded-lg p-1.5 text-olive-400 hover:bg-danger/10 hover:text-danger"><Trash2 className="h-4 w-4" /></button>
+                <button onClick={() => removeArrayItem('stats', i)} className="self-start rounded-xl p-1.5 text-olive-400 transition-all duration-200 hover:bg-danger/10 hover:text-danger hover:scale-110"><Trash2 className="h-4 w-4" /></button>
               </div>
               )
             })}
@@ -184,12 +203,11 @@ export default function AdminContent() {
           </div>
         </SectionEditor>
 
-        {/* Courses Header */}
         <SectionEditor title="Courses Header" onSave={() => saveSection.mutate({ key: 'courses_header', content: local.courses_header || {} })} isPending={saveSection.isPending}>
           <div className="grid gap-4 sm:grid-cols-2">
             {['badge', 'title', 'subtitle', 'lessons_label', 'details_label', 'pay_usd_label'].map((field) => (
-              <div key={field} className="space-y-1">
-                <label className="text-xs font-medium text-olive-500 capitalize">{field.replace(/_/g, ' ')}</label>
+              <div key={field} className="space-y-1.5">
+                <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{field.replace(/_/g, ' ')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <TrInput label="AR" value={((local.courses_header as Record<string, Record<string, string>>)?.[field])?.ar || ''} onChange={(v) => updateTrField('courses_header', field, 'ar', v)} />
                   <TrInput label="EN" value={((local.courses_header as Record<string, Record<string, string>>)?.[field])?.en || ''} onChange={(v) => updateTrField('courses_header', field, 'en', v)} />
@@ -199,34 +217,32 @@ export default function AdminContent() {
           </div>
         </SectionEditor>
 
-        {/* Trust Section */}
         <SectionEditor title="Trust Section" onSave={() => saveSection.mutate({ key: 'trust', content: local.trust || [] })} isPending={saveSection.isPending}>
           <div className="space-y-3">
             {(Array.isArray(local.trust) ? local.trust : []).map((item: Record<string, unknown>, i: number) => (
-              <div key={i} className="flex items-center gap-3 rounded-xl bg-olive-50 p-3">
+              <div key={i} className="flex items-center gap-3 rounded-xl bg-olive-50/60 p-3 border border-olive-100/40">
                 <div className="grid flex-1 grid-cols-2 gap-2">
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <TrInput label="Label AR" value={(item.label as Record<string, string>)?.ar || ''} onChange={(v) => updateArrayItem('trust', i, 'label', 'ar', v)} />
                     <TrInput label="Sub AR" value={(item.sub as Record<string, string>)?.ar || ''} onChange={(v) => updateArrayItem('trust', i, 'sub', 'ar', v)} />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <TrInput label="Label EN" value={(item.label as Record<string, string>)?.en || ''} onChange={(v) => updateArrayItem('trust', i, 'label', 'en', v)} />
                     <TrInput label="Sub EN" value={(item.sub as Record<string, string>)?.en || ''} onChange={(v) => updateArrayItem('trust', i, 'sub', 'en', v)} />
                   </div>
                 </div>
-                <button onClick={() => removeArrayItem('trust', i)} className="self-start rounded-lg p-1.5 text-olive-400 hover:bg-danger/10 hover:text-danger"><Trash2 className="h-4 w-4" /></button>
+                <button onClick={() => removeArrayItem('trust', i)} className="self-start rounded-xl p-1.5 text-olive-400 transition-all duration-200 hover:bg-danger/10 hover:text-danger hover:scale-110"><Trash2 className="h-4 w-4" /></button>
               </div>
             ))}
             <button onClick={() => addArrayItem('trust', { label: { ar: '', en: '' }, sub: { ar: '', en: '' } })} className="btn-ghost !text-olive-600"><Plus className="h-4 w-4" /><span>Add Trust Item</span></button>
           </div>
         </SectionEditor>
 
-        {/* Testimonials */}
         <SectionEditor title="Testimonials" onSave={() => saveSection.mutate({ key: 'testimonials', content: local.testimonials || {} })} isPending={saveSection.isPending}>
           <div className="grid gap-4 sm:grid-cols-2 mb-4">
             {['title', 'subtitle'].map((field) => (
-              <div key={field} className="space-y-1">
-                <label className="text-xs font-medium text-olive-500 capitalize">{field}</label>
+              <div key={field} className="space-y-1.5">
+                <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{field}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <TrInput label="AR" value={((local.testimonials as Record<string, Record<string, string>>)?.[field])?.ar || ''} onChange={(v) => updateTrField('testimonials', field, 'ar', v)} />
                   <TrInput label="EN" value={((local.testimonials as Record<string, Record<string, string>>)?.[field])?.en || ''} onChange={(v) => updateTrField('testimonials', field, 'en', v)} />
@@ -236,7 +252,7 @@ export default function AdminContent() {
           </div>
           <div className="space-y-3">
             {((local.testimonials as Record<string, unknown>)?.items as Array<Record<string, unknown>> || []).map((item: Record<string, unknown>, i: number) => (
-              <div key={i} className="rounded-xl bg-olive-50 p-4">
+              <div key={i} className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/40">
                 <div className="flex gap-3">
                   <div className="flex-1 space-y-2">
                     <input value={item.name as string || ''} onChange={(e) => {
@@ -250,7 +266,7 @@ export default function AdminContent() {
                       <TrInput label="Text EN" value={(item.text as Record<string, string>)?.en || ''} onChange={(v) => updateArrayItem('testimonials', i, 'text', 'en', v)} />
                     </div>
                   </div>
-                  <button onClick={() => removeArrayItem('testimonials', i)} className="self-start rounded-lg p-1.5 text-olive-400 hover:bg-danger/10 hover:text-danger"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => removeArrayItem('testimonials', i)} className="self-start rounded-xl p-1.5 text-olive-400 transition-all duration-200 hover:bg-danger/10 hover:text-danger hover:scale-110"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
             ))}
@@ -262,31 +278,30 @@ export default function AdminContent() {
           </div>
         </SectionEditor>
 
-        {/* FAQ Section */}
-        <div className="card p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-olive-800">{t('admin_faq')}</h2>
+        <div className="admin-card overflow-hidden">
+          <div className="flex items-center justify-between p-5">
+            <h2 className="text-base font-bold text-olive-800">{t('admin_faq')}</h2>
             <div className="flex items-center gap-2">
               <button onClick={() => setFaqs([...faqs, { question: '', answer: '', question_en: '', answer_en: '' }])} className="btn-ghost !text-olive-600">
                 <Plus className="h-4 w-4" /><span>{t('admin_add_faq')}</span>
               </button>
-              <button onClick={handleSaveFaqs} disabled={saveSection.isPending} className="btn-primary !gap-1.5 !text-xs">
+              <button onClick={handleSaveFaqs} disabled={saveSection.isPending} className="btn-primary !gap-1.5 !text-xs !rounded-lg">
                 {saveSection.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                 <span>Save</span>
               </button>
             </div>
           </div>
-          <div className="space-y-4">
+          <div className="border-t border-olive-100/60 p-5 space-y-3">
             {faqs.map((faq, i) => (
-              <div key={i} className="rounded-xl bg-olive-50 p-4">
+              <div key={i} className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/40">
                 <div className="flex gap-3">
-                  <div className="flex-1 space-y-3">
+                  <div className="flex-1 space-y-2">
                     <input value={faq.question} onChange={(e) => { const next = [...faqs]; next[i] = { ...next[i], question: e.target.value }; setFaqs(next) }} placeholder={`${t('admin_question')} (AR)`} className="input-field" />
                     <input value={faq.answer} onChange={(e) => { const next = [...faqs]; next[i] = { ...next[i], answer: e.target.value }; setFaqs(next) }} placeholder={`${t('admin_answer')} (AR)`} className="input-field" />
                     <input value={faq.question_en} onChange={(e) => { const next = [...faqs]; next[i] = { ...next[i], question_en: e.target.value }; setFaqs(next) }} placeholder={`${t('admin_question')} (EN)`} className="input-field" />
                     <input value={faq.answer_en} onChange={(e) => { const next = [...faqs]; next[i] = { ...next[i], answer_en: e.target.value }; setFaqs(next) }} placeholder={`${t('admin_answer')} (EN)`} className="input-field" />
                   </div>
-                  <button onClick={() => setFaqs(faqs.filter((_, idx) => idx !== i))} className="self-start rounded-lg p-2 text-olive-400 transition-colors hover:bg-danger/10 hover:text-danger">
+                  <button onClick={() => setFaqs(faqs.filter((_, idx) => idx !== i))} className="self-start rounded-xl p-2 text-olive-400 transition-all duration-200 hover:bg-danger/10 hover:text-danger hover:scale-110">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -295,12 +310,11 @@ export default function AdminContent() {
           </div>
         </div>
 
-        {/* CTA Section */}
         <SectionEditor title="CTA Section" onSave={() => saveSection.mutate({ key: 'cta', content: local.cta || {} })} isPending={saveSection.isPending}>
           <div className="grid gap-4 sm:grid-cols-3">
             {['title', 'subtitle', 'btn'].map((field) => (
-              <div key={field} className="space-y-1">
-                <label className="text-xs font-medium text-olive-500 capitalize">{field}</label>
+              <div key={field} className="space-y-1.5">
+                <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{field}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <TrInput label="AR" value={((local.cta as Record<string, Record<string, string>>)?.[field])?.ar || ''} onChange={(v) => updateTrField('cta', field, 'ar', v)} />
                   <TrInput label="EN" value={((local.cta as Record<string, Record<string, string>>)?.[field])?.en || ''} onChange={(v) => updateTrField('cta', field, 'en', v)} />
@@ -310,12 +324,11 @@ export default function AdminContent() {
           </div>
         </SectionEditor>
 
-        {/* Footer */}
         <SectionEditor title="Footer" onSave={() => saveSection.mutate({ key: 'footer', content: local.footer || {} })} isPending={saveSection.isPending}>
           <div className="grid gap-4 sm:grid-cols-2">
             {['home', 'courses', 'faq', 'rights'].map((field) => (
-              <div key={field} className="space-y-1">
-                <label className="text-xs font-medium text-olive-500 capitalize">{field}</label>
+              <div key={field} className="space-y-1.5">
+                <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{field}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <TrInput label="AR" value={((local.footer as Record<string, Record<string, string>>)?.[field])?.ar || ''} onChange={(v) => updateTrField('footer', field, 'ar', v)} />
                   <TrInput label="EN" value={((local.footer as Record<string, Record<string, string>>)?.[field])?.en || ''} onChange={(v) => updateTrField('footer', field, 'en', v)} />
@@ -325,12 +338,11 @@ export default function AdminContent() {
           </div>
         </SectionEditor>
 
-        {/* Success Page */}
         <SectionEditor title="Checkout Success" onSave={() => saveSection.mutate({ key: 'success', content: local.success || {} })} isPending={saveSection.isPending}>
           <div className="grid gap-4 sm:grid-cols-2">
             {['title', 'message', 'next', 'next_text', 'contact'].map((field) => (
-              <div key={field} className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-medium text-olive-500 capitalize">{field.replace(/_/g, ' ')}</label>
+              <div key={field} className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{field.replace(/_/g, ' ')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <TrInput label="AR" value={((local.success as Record<string, Record<string, string>>)?.[field])?.ar || ''} onChange={(v) => updateTrField('success', field, 'ar', v)} />
                   <TrInput label="EN" value={((local.success as Record<string, Record<string, string>>)?.[field])?.en || ''} onChange={(v) => updateTrField('success', field, 'en', v)} />
@@ -340,12 +352,11 @@ export default function AdminContent() {
           </div>
         </SectionEditor>
 
-        {/* Fail Page */}
         <SectionEditor title="Checkout Failed" onSave={() => saveSection.mutate({ key: 'fail', content: local.fail || {} })} isPending={saveSection.isPending}>
           <div className="grid gap-4 sm:grid-cols-2">
             {['title', 'message', 'retry'].map((field) => (
-              <div key={field} className="space-y-1">
-                <label className="text-xs font-medium text-olive-500 capitalize">{field}</label>
+              <div key={field} className="space-y-1.5">
+                <label className="text-xs font-semibold text-olive-500 uppercase tracking-wider">{field}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <TrInput label="AR" value={((local.fail as Record<string, Record<string, string>>)?.[field])?.ar || ''} onChange={(v) => updateTrField('fail', field, 'ar', v)} />
                   <TrInput label="EN" value={((local.fail as Record<string, Record<string, string>>)?.[field])?.en || ''} onChange={(v) => updateTrField('fail', field, 'en', v)} />
