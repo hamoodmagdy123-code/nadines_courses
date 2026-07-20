@@ -60,7 +60,7 @@ export function AdminLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 right-0 z-50 w-64 border-l border-olive-100/60 bg-white/95 backdrop-blur-sm transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 right-0 z-50 w-64 border-l border-olive-100/60 bg-white/95 backdrop-blur-sm transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ boxShadow: sidebarOpen ? '-4px 0 20px rgba(42,44,20,0.08)' : 'none' }}
