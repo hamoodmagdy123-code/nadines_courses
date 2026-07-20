@@ -74,6 +74,8 @@ const t = {
     admin_confirm_permanent_delete: 'هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع عن هذا الإجراء.',
     admin_archived: 'الأرشيف',
     admin_order_distribution: 'توزيع الطلبات',
+    admin_analytics: 'تحليلات الموقع',
+    admin_analytics_sub: 'الزوار، مشاهدات الصفحة، الدول والمزيد',
   },
   en: {
     nav_courses: 'Courses',
@@ -148,6 +150,8 @@ const t = {
     admin_confirm_permanent_delete: 'Are you sure you want to permanently delete? This cannot be undone.',
     admin_archived: 'Archived',
     admin_order_distribution: 'Order Distribution',
+    admin_analytics: 'Website Analytics',
+    admin_analytics_sub: 'Visitors, page views, countries & more',
   },
 } as const
 

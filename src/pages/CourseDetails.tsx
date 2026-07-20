@@ -16,9 +16,12 @@ import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, 
 const ICON_MAP: Record<string, LucideIcon> = { Package, Layers }
 
 const purchaseSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().min(10),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  email: z.string().email('Please enter a valid email address'),
+  phone: z.string().regex(
+    /^(\+?[1-9]\d{0,3})?[\s\-]?\(?\d{1,5}\)?[\s\-]?\d{1,5}[\s\-]?\d{1,9}$/,
+    'Please enter a valid phone number'
+  ),
 })
 
 type PurchaseForm = z.infer<typeof purchaseSchema>
@@ -151,17 +154,17 @@ export default function CourseDetails() {
                     <div>
                       <label className="mb-1.5 block text-sm font-medium text-olive-800">{tr('course_page', 'form_name')}</label>
                       <input {...register('name')} placeholder={tr('course_page', 'form_name_placeholder')} className="input-field" />
-                      {errors.name && <p className="mt-1 text-xs text-danger">Required</p>}
+                      {errors.name && <p className="mt-1 text-xs text-danger">{errors.name.message}</p>}
                     </div>
                     <div>
                       <label className="mb-1.5 block text-sm font-medium text-olive-800">{tr('course_page', 'form_email')}</label>
                       <input {...register('email')} type="email" placeholder="example@email.com" className="input-field" dir="ltr" />
-                      {errors.email && <p className="mt-1 text-xs text-danger">Invalid</p>}
+                      {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
                     </div>
                     <div>
                       <label className="mb-1.5 block text-sm font-medium text-olive-800">{tr('course_page', 'form_phone')}</label>
-                      <input {...register('phone')} type="tel" placeholder="01XXXXXXXXX" className="input-field" dir="ltr" />
-                      {errors.phone && <p className="mt-1 text-xs text-danger">Invalid</p>}
+                      <input {...register('phone')} type="tel" placeholder="+20 100 000 0000" className="input-field" dir="ltr" />
+                      {errors.phone && <p className="mt-1 text-xs text-danger">{errors.phone.message}</p>}
                     </div>
                     {error && (
                       <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">

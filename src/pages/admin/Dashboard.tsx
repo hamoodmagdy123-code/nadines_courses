@@ -9,6 +9,8 @@ import {
   CheckCircle,
   Clock,
   Loader2,
+  BarChart3,
+  ExternalLink,
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -131,6 +133,26 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Analytics quick access */}
+      <div className="mt-6">
+        <a
+          href="https://vercel.com/nadiness/nadines-courses/analytics"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="card group flex items-center gap-4 p-5 transition-all duration-200 hover:-translate-y-0.5"
+          style={{ boxShadow: '0 1px 3px rgba(42,44,20,0.04), 0 8px 30px -8px rgba(63,66,31,0.12)' }}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-olive-100 text-olive-600 transition-colors group-hover:bg-olive-200">
+            <BarChart3 className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-olive-800">{t('admin_analytics') || 'Website Analytics'}</h3>
+            <p className="text-sm text-olive-500">{t('admin_analytics_sub') || 'Visitors, page views, countries & more'}</p>
+          </div>
+          <ExternalLink className="h-4 w-4 text-olive-400 transition-colors group-hover:text-olive-600" />
+        </a>
       </div>
     </div>
   )
