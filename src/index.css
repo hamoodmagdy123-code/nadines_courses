@@ -325,6 +325,24 @@
   .reveal-delay-3 { transition-delay: 300ms; }
   .reveal-delay-4 { transition-delay: 400ms; }
 
+  .reveal-init {
+    opacity: 0;
+    transform: translateY(24px);
+    will-change: opacity, transform;
+  }
+  .reveal-on-intersect {
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-init { opacity: 1; transform: none; }
+    .reveal-on-intersect { transition: none; }
+  }
+
   .gradient-text {
     background: linear-gradient(135deg, var(--color-olive-700) 0%, var(--color-olive-500) 50%, var(--color-olive-700) 100%);
     -webkit-background-clip: text;

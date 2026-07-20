@@ -22,7 +22,7 @@ export function useSiteContent() {
 }
 
 export function useSC() {
-  const { data = [] } = useSiteContent()
+  const { data = [], isLoading } = useSiteContent()
   const { lang } = useLang()
 
   const get = (key: string): Record<string, unknown> => {
@@ -46,5 +46,5 @@ export function useSC() {
     return (section.items as unknown[]) || []
   }
 
-  return { get, tr, arr, data, isLoading: data.length === 0 }
+  return { get, tr, arr, data, isLoading }
 }

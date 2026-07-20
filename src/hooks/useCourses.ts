@@ -14,6 +14,7 @@ export function useCourses() {
       if (error) throw error
       return data as Course[]
     },
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -28,6 +29,7 @@ export function useAllCourses() {
       if (error) throw error
       return data as Course[]
     },
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -43,26 +45,6 @@ export function useCourseBySlug(slug: string) {
       if (error) throw error
       return data as Course
     },
-  })
-}
-
-export function useFAQ() {
-  return useQuery({
-    queryKey: ['faq'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('site_content')
-        .select('content')
-        .eq('section_key', 'faq')
-        .single()
-      if (error) throw error
-      const content = data.content as Record<string, unknown>
-      return (content.items || content) as Array<{
-        question: string
-        answer: string
-        question_en: string
-        answer_en: string
-      }>
-    },
+    staleTime: 5 * 60 * 1000,
   })
 }

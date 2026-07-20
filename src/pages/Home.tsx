@@ -1,7 +1,7 @@
 import { useGeo } from '@/hooks/useGeo'
 import { Navbar } from '@/components/Navbar'
 import { CourseCard } from '@/components/CourseCard'
-import { useCourses, useFAQ } from '@/hooks/useCourses'
+import { useCourses } from '@/hooks/useCourses'
 import { useSC } from '@/hooks/useSiteContent'
 import { useLang } from '@/i18n/context'
 import {
@@ -11,22 +11,25 @@ import {
 } from '@/components/icons'
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 
-function useReveal(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
+let sharedObserver: IntersectionObserver | null = null
+const visibleTargets = new WeakSet<Element>()
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect() } },
-      { threshold }
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [threshold])
-
-  return { ref, visible }
+function getObserver() {
+  if (sharedObserver) return sharedObserver
+  if (typeof IntersectionObserver === 'undefined') return null
+  sharedObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting && !visibleTargets.has(entry.target)) {
+          visibleTargets.add(entry.target)
+          entry.target.classList.add('reveal-visible')
+          sharedObserver?.unobserve(entry.target)
+        }
+      }
+    },
+    { threshold: 0.05, rootMargin: '0px 0px 40px 0px' },
+  )
+  return sharedObserver
 }
 
 function RevealSection({
@@ -38,13 +41,33 @@ function RevealSection({
   className?: string
   delay?: number
 }) {
-  const { ref, visible } = useReveal()
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = getObserver()
+    if (!obs) return
+    obs.observe(el)
+    return () => {
+      obs.unobserve(el)
+    }
+  }, [])
+
+  if (delay > 0) {
+    return (
+      <div
+        ref={ref}
+        className={`reveal-init reveal-on-intersect ${className}`}
+        style={{ transitionDelay: `${delay}ms` }}
+      >
+        {children}
+      </div>
+    )
+  }
+
   return (
-    <div
-      ref={ref}
-      className={`transition-all duration-[900ms] cubic-bezier(0.16,1,0.3,1] ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
+    <div ref={ref} className={`reveal-init reveal-on-intersect ${className}`}>
       {children}
     </div>
   )
@@ -235,7 +258,7 @@ function TrustSection() {
 function CoursesSection() {
   const { countryCode } = useGeo()
   const { tr } = useSC()
-  const { data: courses = [] } = useCourses()
+  const { data: courses = [], isLoading } = useCourses()
   const { lang } = useLang()
 
   return (
@@ -254,15 +277,41 @@ function CoursesSection() {
           </div>
         </RevealSection>
 
-        <div className="space-y-6 sm:space-y-8">
-          {courses.map((course, i) => (
-            <RevealSection key={course.id} delay={i * 150}>
-              <CourseCard course={course} countryCode={countryCode} variant={i === 0 ? 'primary' : 'secondary'} />
-            </RevealSection>
-          ))}
-        </div>
-
-        {courses.length === 0 && (
+        {isLoading ? (
+          <div className="space-y-6 sm:space-y-8">
+            {[0, 1].map((i) => (
+              <div key={i} className="animate-pulse overflow-hidden rounded-2xl bg-white/60 ring-1 ring-olive-100/30 sm:rounded-3xl lg:grid lg:grid-cols-[1fr_1.15fr]">
+                <div className="min-h-[200px] bg-olive-100/40 sm:min-h-[280px] lg:min-h-[320px]" />
+                <div className="p-5 sm:p-6 lg:p-8">
+                  <div className="mb-3 flex items-center gap-2.5">
+                    <div className="h-10 w-10 rounded-xl bg-olive-100" />
+                    <div className="h-5 w-40 rounded-lg bg-olive-100" />
+                  </div>
+                  <div className="mb-4 space-y-2">
+                    <div className="h-3 w-full rounded bg-olive-100/60" />
+                    <div className="h-3 w-3/4 rounded bg-olive-100/60" />
+                  </div>
+                  <div className="mb-5 space-y-2">
+                    <div className="h-3 w-5/6 rounded bg-olive-100/40" />
+                    <div className="h-3 w-2/3 rounded bg-olive-100/40" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="h-6 w-20 rounded-lg bg-olive-100" />
+                    <div className="h-10 w-28 rounded-xl bg-olive-100" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : courses.length > 0 ? (
+          <div className="space-y-6 sm:space-y-8">
+            {courses.map((course, i) => (
+              <RevealSection key={course.id} delay={i * 150}>
+                <CourseCard course={course} countryCode={countryCode} variant={i === 0 ? 'primary' : 'secondary'} />
+              </RevealSection>
+            ))}
+          </div>
+        ) : (
           <RevealSection>
             <div className="py-12 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-olive-100/60">
@@ -350,10 +399,10 @@ function TestimonialsSection() {
 }
 
 function FAQSection() {
-  const { data: faqs = [] } = useFAQ()
+  const { arr, tr } = useSC()
+  const faqs = arr('faq') as Array<{ question: string; answer: string; question_en: string; answer_en: string }>
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const { lang } = useLang()
-  const { tr } = useSC()
 
   return (
     <section id="faq" className="relative overflow-hidden py-20 pb-28 sm:py-28 sm:pb-36">

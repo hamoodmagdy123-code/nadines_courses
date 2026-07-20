@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'
 import t, { type Lang, type TranslationKey } from './translations'
 
 interface LangCtx {
@@ -36,13 +36,14 @@ export function LangProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
   }, [lang])
 
-  const translate = (key: TranslationKey) => t[lang][key] || t.ar[key]
+  const translate = useCallback((key: TranslationKey) => t[lang][key] || t.ar[key], [lang])
 
-  return (
-    <Ctx.Provider value={{ lang, setLang, t: translate, dir: lang === 'ar' ? 'rtl' : 'ltr' }}>
-      {children}
-    </Ctx.Provider>
+  const value = useMemo(
+    () => ({ lang, setLang, t: translate, dir: lang === 'ar' ? ('rtl' as const) : ('ltr' as const) }),
+    [lang, translate],
   )
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
 export function useLang() {

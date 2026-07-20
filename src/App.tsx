@@ -17,7 +17,16 @@ const AdminCourses = lazy(() => import('@/pages/admin/Courses'))
 const AdminOrders = lazy(() => import('@/pages/admin/Orders'))
 const AdminContent = lazy(() => import('@/pages/admin/Content'))
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+})
 
 function Loader() {
   return (
