@@ -78,7 +78,7 @@ function HeroSection() {
   const { tr } = useSC()
 
   return (
-    <section className="relative overflow-hidden bg-olive-500 pt-24 pb-16 sm:pt-28 sm:pb-20">
+    <section className="relative overflow-hidden bg-olive-500 pt-24 pb-10 sm:pt-28 sm:pb-14 lg:pt-20 lg:pb-8">
       <div className="hero-mesh pointer-events-none absolute inset-0" />
         <div className="pointer-events-none absolute inset-0">
         <div className="float-orb absolute left-[10%] top-[15%] h-3 w-3 rounded-full bg-sticky-yellow/60 hidden sm:block" />
@@ -89,7 +89,7 @@ function HeroSection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-paper/[0.97] p-5 sm:p-8 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 lg:p-12"
+        <div className="overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-paper/[0.97] p-5 sm:p-8 lg:grid lg:grid-cols-2 lg:items-center lg:gap-8 lg:p-8"
           style={{ boxShadow: '0 30px 80px -20px rgba(42,44,20,0.5), 0 0 0 1px rgba(255,255,255,0.15) inset' }}
         >
           <div className={`text-center ${lang === 'ar' ? 'lg:text-right' : 'lg:text-left'}`}>
@@ -99,15 +99,15 @@ function HeroSection() {
               </span>
             </div>
 
-            <h1 className="animate-fade-in-up animation-delay-100 text-[1.75rem] font-extrabold leading-[1.12] text-olive-900 sm:text-4xl lg:text-[2.75rem] tracking-tight">
+            <h1 className="animate-fade-in-up animation-delay-100 text-[1.75rem] font-extrabold leading-[1.12] text-olive-900 sm:text-4xl lg:text-[2.25rem] tracking-tight">
               {tr('hero', 'title')}
             </h1>
 
-            <p className={`animate-fade-in-up animation-delay-200 mx-auto mt-4 max-w-sm text-sm leading-relaxed text-olive-600 sm:mt-5 sm:max-w-md sm:text-base lg:text-lg ${lang === 'ar' ? 'lg:mx-0' : 'lg:ml-0 lg:mr-auto'}`}>
+            <p className={`animate-fade-in-up animation-delay-200 mx-auto mt-3 max-w-sm text-sm leading-relaxed text-olive-600 sm:mt-4 sm:max-w-md sm:text-base lg:text-lg ${lang === 'ar' ? 'lg:mx-0' : 'lg:ml-0 lg:mr-auto'}`}>
               {tr('hero', 'subtitle')}
             </p>
 
-            <div className={`animate-fade-in-up animation-delay-300 mt-6 flex flex-col items-center gap-3 sm:mt-8 sm:flex-row sm:gap-4 ${lang === 'ar' ? 'lg:justify-start' : 'lg:justify-start'}`}>
+            <div className={`animate-fade-in-up animation-delay-300 mt-5 flex flex-col items-center gap-3 sm:mt-6 sm:flex-row sm:gap-4 ${lang === 'ar' ? 'lg:justify-start' : 'lg:justify-start'}`}>
               <a href="#courses" className="btn-primary btn-shimmer !px-7 !py-3.5 !text-sm sm:!px-8 sm:!py-4 sm:!text-base !rounded-xl w-full sm:w-auto">
                 {tr('hero', 'cta')}
               </a>
@@ -120,7 +120,7 @@ function HeroSection() {
               </a>
             </div>
 
-            <div className={`animate-fade-in-up animation-delay-400 mt-5 flex items-center gap-3 sm:mt-6 ${lang === 'ar' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-start'}`}>
+            <div className={`animate-fade-in-up animation-delay-400 mt-4 flex items-center gap-3 sm:mt-5 ${lang === 'ar' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-start'}`}>
               <div className="flex -space-x-2 rtl:space-x-reverse">
                 {[0,1,2].map(i => (
                   <div key={i} className="h-7 w-7 rounded-full border-2 border-paper bg-gradient-to-br from-olive-200 to-olive-300 shadow-sm" style={{ zIndex: 3-i }} />
@@ -177,8 +177,8 @@ function StatsBar() {
   if (!stats.length) return null
 
   return (
-    <RevealSection className="relative z-10 mx-auto -mt-8 max-w-3xl px-4 sm:-mt-10 sm:px-6">
-      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/95 backdrop-blur-sm p-4 sm:p-6 sm:gap-5"
+    <RevealSection className="relative z-10 mx-auto -mt-6 max-w-3xl px-4 sm:-mt-8 sm:px-6">
+      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/95 backdrop-blur-sm p-3 sm:p-5 sm:gap-5"
         style={{ boxShadow: '0 15px 50px -15px rgba(42,44,20,0.15), 0 0 0 1px rgba(255,255,255,0.6) inset' }}
       >
         {stats.map((s, i) => {
