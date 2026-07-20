@@ -73,7 +73,7 @@ export function CourseCard({ course, countryCode, variant = 'primary' }: Props) 
 
           <div className="relative z-10 w-full max-w-[140px] sm:max-w-[180px] lg:max-w-[200px]">
             <img
-              src="/nadines.webp"
+              src={course.image_url || '/nadines.webp'}
               alt={title}
               className="w-full drop-shadow-xl transition-transform duration-700 group-hover:scale-[1.04]"
               loading="lazy"

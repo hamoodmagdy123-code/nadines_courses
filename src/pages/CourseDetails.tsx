@@ -109,7 +109,7 @@ export default function CourseDetails() {
           <div className="grid gap-8 lg:grid-cols-5">
             <div className="lg:col-span-3">
               <div className="relative overflow-hidden rounded-[2rem]">
-                <img src={course.image_url} alt={title} className="h-64 w-full object-cover sm:h-80" loading="lazy" />
+                <img src={course.image_url || '/nadines.webp'} alt={title} className="h-64 w-full object-cover sm:h-80" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 inset-x-0 p-6 sm:p-8">
                   {(() => { const CI = ICON_MAP[course.icon] || Package; return <CI className="mb-2 h-8 w-8 text-white/80" strokeWidth={1.5} />; })()}
