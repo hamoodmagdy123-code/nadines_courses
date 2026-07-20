@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { lazy, Suspense } from 'react'
 import { LangProvider } from '@/i18n/context'
+import { Analytics } from '@vercel/analytics/react'
 
 import { PublicLayout } from '@/pages/PublicLayout'
 import { AdminLayout } from '@/pages/admin/AdminLayout'
@@ -53,6 +54,7 @@ export default function App() {
           </Suspense>
         </BrowserRouter>
       </LangProvider>
+      <Analytics />
     </QueryClientProvider>
   )
 }
