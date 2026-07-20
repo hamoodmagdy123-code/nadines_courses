@@ -1,7 +1,7 @@
 import type { Course } from '@/lib/data'
 import { formatPrice, getDisplayPrice } from '@/lib/pricing'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, Package, Layers } from '@/components/icons'
+import { ArrowRight, Check, Package, Layers } from 'lucide-react'
 import { useLang } from '@/i18n/context'
 import { useSC } from '@/hooks/useSiteContent'
 import { useExchangeRates } from '@/hooks/useExchangeRates'
@@ -73,7 +73,7 @@ export function CourseCard({ course, countryCode, variant = 'primary' }: Props) 
 
           <div className="relative z-10 w-full max-w-[140px] sm:max-w-[180px] lg:max-w-[200px]">
             <img
-              src="/nadines.png"
+              src="/nadines.webp"
               alt={title}
               className="w-full drop-shadow-xl transition-transform duration-700 group-hover:scale-[1.04]"
               loading="lazy"

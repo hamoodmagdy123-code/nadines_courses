@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { useSC } from '@/hooks/useSiteContent'
-import { CheckCircle, Clock, MessageCircle, Loader2 } from '@/components/icons'
+import { CheckCircle, Clock, MessageCircle, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 const FUNCTIONS_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`

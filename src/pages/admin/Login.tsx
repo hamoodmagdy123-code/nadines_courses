@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GraduationCap, Loader2, Lock, Mail } from '@/components/icons'
+import { GraduationCap, Loader2, Lock, Mail } from 'lucide-react'
 import { useLang } from '@/i18n/context'
 import { useAuth } from '@/hooks/useAuth'
 

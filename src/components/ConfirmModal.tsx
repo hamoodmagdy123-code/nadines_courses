@@ -1,4 +1,4 @@
-import { AlertTriangle, Trash2, Info, X } from '@/components/icons'
+import { AlertTriangle, Trash2, Info, X } from 'lucide-react'
 import { useEffect } from 'react'
 
 interface ConfirmModalProps {

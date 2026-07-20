@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useLang } from '@/i18n/context'
-import { Globe, Menu, X } from '@/components/icons'
+import { Globe, Menu, X } from 'lucide-react'
 
 export function Navbar() {
   const { lang, setLang, t } = useLang()

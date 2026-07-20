@@ -17,7 +17,7 @@ import {
   Archive,
   RotateCcw,
   Package,
-} from '@/components/icons'
+} from 'lucide-react'
 
 export default function AdminOrders() {
   const [filter, setFilter] = useState<string>('all')

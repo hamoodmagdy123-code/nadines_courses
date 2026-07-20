@@ -9,7 +9,7 @@ import {
   CheckCircle,
   Clock,
   Loader2,
-} from '@/components/icons'
+} from 'lucide-react'
 
 export default function Dashboard() {
   const { t } = useLang()

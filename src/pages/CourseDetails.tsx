@@ -11,7 +11,7 @@ import { useLang } from '@/i18n/context'
 import { useSC } from '@/hooks/useSiteContent'
 import { createOrder } from '@/lib/functions'
 import { useExchangeRates } from '@/hooks/useExchangeRates'
-import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, SearchX } from '@/components/icons'
+import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, SearchX } from 'lucide-react'
 
 const ICON_MAP: Record<string, typeof Package> = { Package, Layers }
 

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useSC } from '@/hooks/useSiteContent'
-import { XCircle, RefreshCcw } from '@/components/icons'
+import { XCircle, RefreshCcw } from 'lucide-react'
 
 export default function CheckoutFailed() {
   const { tr } = useSC()

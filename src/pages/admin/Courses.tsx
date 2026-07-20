@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Save, Loader2, Package, Layers, Plus, Trash2, X } from '@/components/icons'
+import { Save, Loader2, Package, Layers, Plus, Trash2, X } from 'lucide-react'
 import { useLang } from '@/i18n/context'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAllCourses } from '@/hooks/useCourses'
@@ -26,7 +26,7 @@ interface CourseForm {
 const EMPTY_FORM: CourseForm = {
   title: '', title_en: '', description: '', description_en: '',
   slug: '', egypt_price: 0, international_price_usd: 0,
-  image_url: '/digital_products.png', icon: 'Package', sort_order: 0,
+  image_url: '/nadines.webp', icon: 'Package', sort_order: 0,
   curriculum: '', curriculum_en: '',
 }
 

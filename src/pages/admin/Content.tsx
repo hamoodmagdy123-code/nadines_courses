@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Save, Loader2, Plus, Trash2, ChevronDown } from '@/components/icons'
+import { Save, Loader2, Plus, Trash2, ChevronDown } from 'lucide-react'
 import { useLang } from '@/i18n/context'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'

@@ -9,10 +9,10 @@ import {
   GraduationCap,
   Menu,
   X,
-} from '@/components/icons'
+} from 'lucide-react'
 import { useLang } from '@/i18n/context'
 import { useAuth } from '@/hooks/useAuth'
-import { Loader2 } from '@/components/icons'
+import { Loader2 } from 'lucide-react'
 
 function AdminNavItems() {
   const { t } = useLang()
