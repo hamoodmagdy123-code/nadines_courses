@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { lazy, Suspense } from 'react'
 import { LangProvider } from '@/i18n/context'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 import { PublicLayout } from '@/pages/PublicLayout'
 import { AdminLayout } from '@/pages/admin/AdminLayout'
@@ -55,6 +56,7 @@ export default function App() {
         </BrowserRouter>
       </LangProvider>
       <Analytics />
+      <SpeedInsights />
     </QueryClientProvider>
   )
 }
