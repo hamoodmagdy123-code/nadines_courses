@@ -11,7 +11,7 @@ import { useLang } from '@/i18n/context'
 import { useSC } from '@/hooks/useSiteContent'
 import { createOrder } from '@/lib/functions'
 import { useExchangeRates } from '@/hooks/useExchangeRates'
-import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, SearchX } from 'lucide-react'
+import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, SearchX, Copy, MessageCircle } from 'lucide-react'
 
 const ICON_MAP: Record<string, typeof Package> = { Package, Layers }
 
@@ -33,7 +33,9 @@ export default function CourseDetails() {
   const { data: rates } = useExchangeRates()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { lang } = useLang()
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'instapay'>('card')
+  const [copied, setCopied] = useState(false)
+  const { t, lang } = useLang()
   const { tr } = useSC()
   const dir = lang === 'ar' ? 'rtl' : 'ltr'
 
@@ -95,7 +97,7 @@ export default function CourseDetails() {
   return (
     <>
       <Navbar />
-      <div className="relative bg-paper">
+      <div className="relative bg-paper overflow-hidden">
         <div className="absolute inset-0 -z-10">
           <div className="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-olive-100/30 blur-[80px]" />
           <div className="absolute -left-20 bottom-0 h-60 w-60 rounded-full bg-sticky-yellow/10 blur-[60px]" />
@@ -157,35 +159,118 @@ export default function CourseDetails() {
                       ))}
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                      <div>
-                        <label className="mb-1.5 block text-sm font-semibold text-olive-800">{tr('course_page', 'form_name')}</label>
-                        <input {...register('name')} placeholder={tr('course_page', 'form_name_placeholder')} className="input-field" />
-                        {errors.name && <p className="mt-1 text-xs text-danger">{errors.name.message}</p>}
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-semibold text-olive-800">{tr('course_page', 'form_email')}</label>
-                        <input {...register('email')} type="email" placeholder="example@email.com" className="input-field" dir="ltr" />
-                        {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-semibold text-olive-800">{tr('course_page', 'form_phone')}</label>
-                        <input {...register('phone')} type="tel" placeholder="+20 100 000 0000" className="input-field" dir="ltr" />
-                        {errors.phone && <p className="mt-1 text-xs text-danger">{errors.phone.message}</p>}
-                      </div>
-                      {error && (
-                        <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">
-                          {error}
+                    <div className="space-y-3">
+                      <label className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'card' ? 'border-olive-400 bg-olive-50/60' : 'border-olive-100 hover:border-olive-200'}`}>
+                        <input
+                          type="radio"
+                          name="payment"
+                          checked={paymentMethod === 'card'}
+                          onChange={() => setPaymentMethod('card')}
+                          className="h-4 w-4 accent-olive-600"
+                        />
+                        <div className="flex-1">
+                          <span className="font-bold text-olive-900">{t('payment_tab_card')}</span>
+                          <div className="mt-1.5 flex items-center gap-1.5">
+                            <img src="/visa.svg" alt="Visa" className="h-6 w-9 rounded border border-olive-100 shadow-sm object-contain" />
+                            <img src="/master.svg" alt="Mastercard" className="h-6 w-9 rounded border border-olive-100 shadow-sm object-contain" />
+                            <img src="/meeza.svg" alt="Meeza" className="h-6 w-9 rounded border border-olive-100 shadow-sm object-contain" />
+                          </div>
                         </div>
-                      )}
-                      <button type="submit" disabled={submitting} className="btn-primary w-full !py-3.5 text-base !rounded-xl">
-                        {submitting ? (
-                          <><Loader2 className="h-5 w-5 animate-spin" /><span>{tr('course_page', 'form_processing')}</span></>
-                        ) : (
-                          <><CreditCard className="h-5 w-5" /><span>{tr('course_page', 'form_pay')}</span></>
+                      </label>
+
+                      <label className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'instapay' ? 'border-olive-400 bg-olive-50/60' : 'border-olive-100 hover:border-olive-200'}`}>
+                        <input
+                          type="radio"
+                          name="payment"
+                          checked={paymentMethod === 'instapay'}
+                          onChange={() => setPaymentMethod('instapay')}
+                          className="h-4 w-4 accent-olive-600"
+                        />
+                        <div className="flex-1">
+                          <span className="font-bold text-olive-900">{t('payment_tab_instapay')}</span>
+                        </div>
+                      </label>
+                    </div>
+
+                    {paymentMethod === 'card' && (
+                      <p className="mt-3 text-xs text-olive-400 text-center">
+                        {t('payment_card_note')}
+                      </p>
+                    )}
+
+                    {paymentMethod === 'card' && (
+                      <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4">
+                        <div>
+                          <label className="mb-1.5 block text-sm font-semibold text-olive-800">{tr('course_page', 'form_name')}</label>
+                          <input {...register('name')} placeholder={tr('course_page', 'form_name_placeholder')} className="input-field" />
+                          {errors.name && <p className="mt-1 text-xs text-danger">{errors.name.message}</p>}
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-sm font-semibold text-olive-800">{tr('course_page', 'form_email')}</label>
+                          <input {...register('email')} type="email" placeholder="example@email.com" className="input-field" dir="ltr" />
+                          {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-sm font-semibold text-olive-800">{tr('course_page', 'form_phone')}</label>
+                          <input {...register('phone')} type="tel" placeholder="+20 100 000 0000" className="input-field" dir="ltr" />
+                          {errors.phone && <p className="mt-1 text-xs text-danger">{errors.phone.message}</p>}
+                        </div>
+                        {error && (
+                          <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">
+                            {error}
+                          </div>
                         )}
-                      </button>
-                    </form>
+                        <button type="submit" disabled={submitting} className="btn-primary w-full !py-3.5 text-base !rounded-xl">
+                          {submitting ? (
+                            <><Loader2 className="h-5 w-5 animate-spin" /><span>{tr('course_page', 'form_processing')}</span></>
+                          ) : (
+                            <><CreditCard className="h-5 w-5" /><span>{tr('course_page', 'form_pay')}</span></>
+                          )}
+                        </button>
+                      </form>
+                    )}
+
+                    {paymentMethod === 'instapay' && (
+                      <div className="mt-5 space-y-3">
+                        <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
+                          <p className="text-sm font-semibold text-olive-700 mb-2">{t('instapay_step1')}</p>
+                          <div className="flex items-center justify-between rounded-lg bg-white p-3 border border-olive-100">
+                            <span className="font-bold text-lg text-olive-900" dir="ltr">+201091419925</span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('+201091419925').then(() => {
+                                  setCopied(true)
+                                  setTimeout(() => setCopied(false), 2000)
+                                })
+                              }}
+                              className="flex items-center gap-1.5 rounded-lg bg-olive-100 px-3 py-2 hover:bg-olive-200 transition-colors"
+                            >
+                              {copied ? (
+                                <CheckCircle className="h-4 w-4 text-success" />
+                              ) : (
+                                <Copy className="h-4 w-4 text-olive-600" />
+                              )}
+                              <span className="text-xs font-medium text-olive-600">{copied ? t('instapay_copied') : t('instapay_copy')}</span>
+                            </button>
+                          </div>
+                        </div>
+                        <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
+                          <p className="text-sm font-semibold text-olive-700">{t('instapay_step2')}</p>
+                        </div>
+                        <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
+                          <p className="text-sm font-semibold text-olive-700 mb-3">{t('instapay_step3')}</p>
+                          <a
+                            href="https://wa.me/2+201091419925"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-white font-bold transition-colors hover:bg-green-700"
+                          >
+                            <MessageCircle className="h-5 w-5" />
+                            <span>{t('instapay_whatsapp')}</span>
+                          </a>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mt-4 flex items-center justify-center gap-2 text-xs text-olive-400">
                       <Shield className="h-3.5 w-3.5" />

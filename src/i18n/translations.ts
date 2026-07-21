@@ -77,6 +77,16 @@ const t = {
     admin_order_distribution: 'توزيع الطلبات',
     admin_analytics: 'تحليلات الموقع',
     admin_analytics_sub: 'الزوار، مشاهدات الصفحة، الدول والمزيد',
+
+    payment_tab_card: 'بطاقة',
+    payment_tab_instapay: 'إنستا باي',
+    payment_card_note: 'ستتم إعادة توجيهك لإتمام الدفع بشكل آمن',
+    instapay_step1: '1. حوّل المبلغ للرقم التالي',
+    instapay_step2: '2. التقِ صورة (Screenshot) لإشعار نجاح التحويل',
+    instapay_step3: '3. أرسل الصورة عبر الواتساب لتأكيد الاشتراك',
+    instapay_copy: 'نسخ',
+    instapay_copied: 'تم النسخ',
+    instapay_whatsapp: 'إرسال على الواتساب',
   },
   en: {
     nav_courses: 'Courses',
@@ -154,6 +164,16 @@ const t = {
     admin_order_distribution: 'Order Distribution',
     admin_analytics: 'Website Analytics',
     admin_analytics_sub: 'Visitors, page views, countries & more',
+
+    payment_tab_card: 'Card',
+    payment_tab_instapay: 'InstaPay',
+    payment_card_note: "You'll be redirected to complete your payment securely",
+    instapay_step1: '1. Transfer the amount to the following number',
+    instapay_step2: '2. Take a screenshot of the transfer confirmation',
+    instapay_step3: '3. Send the screenshot via WhatsApp to confirm your subscription',
+    instapay_copy: 'Copy',
+    instapay_copied: 'Copied!',
+    instapay_whatsapp: 'Send on WhatsApp',
   },
 } as const
 
