@@ -273,7 +273,7 @@ export default function CourseDetails() {
                         <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
                           <p className="text-sm font-semibold text-olive-700 mb-3">{t('instapay_step3')}</p>
                           <a
-                            href="https://wa.me/201225965425"
+                            href="https://wa.me/201063167656"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-white font-bold transition-colors hover:bg-green-700"
@@ -315,7 +315,7 @@ export default function CourseDetails() {
                         <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
                           <p className="text-sm font-semibold text-olive-700 mb-3">{t('wallet_step3')}</p>
                           <a
-                            href="https://wa.me/201282192085"
+                            href="https://wa.me/201063167656"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-white font-bold transition-colors hover:bg-green-700"
