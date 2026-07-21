@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
+import TagManager from 'react-gtm-module'
 import { LangProvider } from '@/i18n/context'
 import { Analytics } from '@vercel/analytics/react'
 
@@ -40,6 +41,10 @@ function Loader() {
 }
 
 export default function App() {
+  useEffect(() => {
+    TagManager.initialize({ gtmId: 'GTM-M9WPR7P4' })
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <LangProvider>
