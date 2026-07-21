@@ -33,8 +33,8 @@ export default function CourseDetails() {
   const { data: rates } = useExchangeRates()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'instapay'>('card')
-  const [copied, setCopied] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'instapay' | 'wallet'>('card')
+  const [copied, setCopied] = useState<'instapay' | 'wallet' | null>(null)
   const { t, lang } = useLang()
   const { tr } = useSC()
   const dir = lang === 'ar' ? 'rtl' : 'ltr'
@@ -151,7 +151,7 @@ export default function CourseDetails() {
 
                   <div className="p-6">
                     <div className="mb-6 space-y-3 rounded-xl bg-olive-50/60 p-4">
-                      {[tr('course_page', 'form_benefits_1'), tr('course_page', 'form_benefits_2'), tr('course_page', 'form_benefits_3')].map((b, i) => (
+                      {[tr('course_page', 'form_benefits_1'), tr('course_page', 'form_benefits_2'), tr('course_page', 'form_benefits_3')].filter(Boolean).map((b, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm text-olive-700">
                           <CheckCircle className="h-4 w-4 text-success shrink-0" />
                           <span>{b}</span>
@@ -188,6 +188,19 @@ export default function CourseDetails() {
                         />
                         <div className="flex-1">
                           <span className="font-bold text-olive-900">{t('payment_tab_instapay')}</span>
+                        </div>
+                      </label>
+
+                      <label className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'wallet' ? 'border-olive-400 bg-olive-50/60' : 'border-olive-100 hover:border-olive-200'}`}>
+                        <input
+                          type="radio"
+                          name="payment"
+                          checked={paymentMethod === 'wallet'}
+                          onChange={() => setPaymentMethod('wallet')}
+                          className="h-4 w-4 accent-olive-600"
+                        />
+                        <div className="flex-1">
+                          <span className="font-bold text-olive-900">{t('payment_tab_wallet')}</span>
                         </div>
                       </label>
                     </div>
@@ -235,22 +248,22 @@ export default function CourseDetails() {
                         <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
                           <p className="text-sm font-semibold text-olive-700 mb-2">{t('instapay_step1')}</p>
                           <div className="flex items-center justify-between rounded-lg bg-white p-3 border border-olive-100">
-                            <span className="font-bold text-lg text-olive-900" dir="ltr">+201091419925</span>
+                            <span className="font-bold text-lg text-olive-900" dir="ltr">+201225965425</span>
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText('+201091419925').then(() => {
-                                  setCopied(true)
-                                  setTimeout(() => setCopied(false), 2000)
+                                navigator.clipboard.writeText('+201225965425').then(() => {
+                                  setCopied('instapay')
+                                  setTimeout(() => setCopied(null), 2000)
                                 })
                               }}
                               className="flex items-center gap-1.5 rounded-lg bg-olive-100 px-3 py-2 hover:bg-olive-200 transition-colors"
                             >
-                              {copied ? (
+                              {copied === 'instapay' ? (
                                 <CheckCircle className="h-4 w-4 text-success" />
                               ) : (
                                 <Copy className="h-4 w-4 text-olive-600" />
                               )}
-                              <span className="text-xs font-medium text-olive-600">{copied ? t('instapay_copied') : t('instapay_copy')}</span>
+                              <span className="text-xs font-medium text-olive-600">{copied === 'instapay' ? t('instapay_copied') : t('instapay_copy')}</span>
                             </button>
                           </div>
                         </div>
@@ -260,7 +273,49 @@ export default function CourseDetails() {
                         <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
                           <p className="text-sm font-semibold text-olive-700 mb-3">{t('instapay_step3')}</p>
                           <a
-                            href="https://wa.me/2+201091419925"
+                            href="https://wa.me/201225965425"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-white font-bold transition-colors hover:bg-green-700"
+                          >
+                            <MessageCircle className="h-5 w-5" />
+                            <span>{t('instapay_whatsapp')}</span>
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {paymentMethod === 'wallet' && (
+                      <div className="mt-5 space-y-3">
+                        <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
+                          <p className="text-sm font-semibold text-olive-700 mb-2">{t('wallet_step1')}</p>
+                          <div className="flex items-center justify-between rounded-lg bg-white p-3 border border-olive-100">
+                            <span className="font-bold text-lg text-olive-900" dir="ltr">+201282192085</span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('+201282192085').then(() => {
+                                  setCopied('wallet')
+                                  setTimeout(() => setCopied(null), 2000)
+                                })
+                              }}
+                              className="flex items-center gap-1.5 rounded-lg bg-olive-100 px-3 py-2 hover:bg-olive-200 transition-colors"
+                            >
+                              {copied === 'wallet' ? (
+                                <CheckCircle className="h-4 w-4 text-success" />
+                              ) : (
+                                <Copy className="h-4 w-4 text-olive-600" />
+                              )}
+                              <span className="text-xs font-medium text-olive-600">{copied === 'wallet' ? t('instapay_copied') : t('instapay_copy')}</span>
+                            </button>
+                          </div>
+                        </div>
+                        <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
+                          <p className="text-sm font-semibold text-olive-700">{t('wallet_step2')}</p>
+                        </div>
+                        <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
+                          <p className="text-sm font-semibold text-olive-700 mb-3">{t('wallet_step3')}</p>
+                          <a
+                            href="https://wa.me/201282192085"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-white font-bold transition-colors hover:bg-green-700"

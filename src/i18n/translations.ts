@@ -80,6 +80,7 @@ const t = {
 
     payment_tab_card: 'بطاقة',
     payment_tab_instapay: 'إنستا باي',
+    payment_tab_wallet: 'محفظة إلكترونية',
     payment_card_note: 'ستتم إعادة توجيهك لإتمام الدفع بشكل آمن',
     instapay_step1: '1. حوّل المبلغ للرقم التالي',
     instapay_step2: '2. التقِ صورة (Screenshot) لإشعار نجاح التحويل',
@@ -87,6 +88,9 @@ const t = {
     instapay_copy: 'نسخ',
     instapay_copied: 'تم النسخ',
     instapay_whatsapp: 'إرسال على الواتساب',
+    wallet_step1: '1. حوّل المبلغ للرقم التالي',
+    wallet_step2: '2. التقِ صورة (Screenshot) لإشعار نجاح التحويل',
+    wallet_step3: '3. أرسل الصورة عبر الواتساب لتأكيد الاشتراك',
   },
   en: {
     nav_courses: 'Courses',
@@ -167,6 +171,7 @@ const t = {
 
     payment_tab_card: 'Card',
     payment_tab_instapay: 'InstaPay',
+    payment_tab_wallet: 'Mobile Wallet',
     payment_card_note: "You'll be redirected to complete your payment securely",
     instapay_step1: '1. Transfer the amount to the following number',
     instapay_step2: '2. Take a screenshot of the transfer confirmation',
@@ -174,6 +179,9 @@ const t = {
     instapay_copy: 'Copy',
     instapay_copied: 'Copied!',
     instapay_whatsapp: 'Send on WhatsApp',
+    wallet_step1: '1. Transfer the amount to the following number',
+    wallet_step2: '2. Take a screenshot of the transfer confirmation',
+    wallet_step3: '3. Send the screenshot via WhatsApp to confirm your subscription',
   },
 } as const
 
