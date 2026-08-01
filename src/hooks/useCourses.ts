@@ -45,6 +45,7 @@ export function useCourseBySlug(slug: string) {
       if (error) throw error
       return data as Course
     },
+    enabled: Boolean(slug),
     staleTime: 5 * 60 * 1000,
   })
 }

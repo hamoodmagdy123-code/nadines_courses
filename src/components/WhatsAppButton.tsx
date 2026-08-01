@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '@/i18n/context'
+import { useLocation } from 'react-router-dom'
+import { useCourseBySlug } from '@/hooks/useCourses'
+
+const WHATSAPP_NUMBER = '201063167656'
 
 export function WhatsAppButton() {
   const { lang } = useLang()
+  const { pathname } = useLocation()
   const [visible, setVisible] = useState(false)
+  const courseSlug = pathname.match(/^\/course\/([^/]+)\/?$/)?.[1] || ''
+  const { data: course } = useCourseBySlug(decodeURIComponent(courseSlug))
 
   useEffect(() => {
     const onScroll = () => {
@@ -15,10 +22,21 @@ export function WhatsAppButton() {
   }, [])
 
   const label = lang === 'ar' ? 'احجز كورسك الآن' : 'Book your course now'
+  const courseTitle = course
+    ? (lang === 'ar' ? course.title : course.title_en)
+    : ''
+  const message = courseTitle
+    ? (lang === 'ar'
+        ? `احجز كورس ${courseTitle}`
+        : `I'd like to book the ${courseTitle} course`)
+    : (lang === 'ar'
+        ? 'عايزة أعرف تفاصيل الكورسات المتاحة'
+        : "I'd like to know more about the available courses")
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 
   return (
     <a
-      href="https://wa.me/201063167656"
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
