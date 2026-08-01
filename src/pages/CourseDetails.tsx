@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useCourseBySlug } from '@/hooks/useCourses'
 import { useGeo } from '@/hooks/useGeo'
-import { formatPrice, getDisplayPrice } from '@/lib/pricing'
+import { formatPrice, getDiscountPercent, getDisplayPrice, getOriginalDisplayPrice } from '@/lib/pricing'
 import { Navbar } from '@/components/Navbar'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod/v4'
@@ -14,6 +14,8 @@ import { useExchangeRates } from '@/hooks/useExchangeRates'
 import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, Package, Layers, SearchX, Copy, MessageCircle } from 'lucide-react'
 
 const ICON_MAP: Record<string, typeof Package> = { Package, Layers }
+const ONLINE_PAYMENTS_ENABLED = false
+const WHATSAPP_NUMBER = '201063167656'
 
 const purchaseSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -93,6 +95,12 @@ export default function CourseDetails() {
   const desc = lang === 'ar' ? course.description : course.description_en
   const curriculum = lang === 'ar' ? course.curriculum : course.curriculum_en
   const price = getDisplayPrice(course, countryCode, rates)
+  const originalPrice = getOriginalDisplayPrice(course, countryCode, rates)
+  const discountPercent = originalPrice ? getDiscountPercent(price.amount, originalPrice.amount) : null
+  const whatsappMessage = lang === 'ar'
+    ? `احجز كورس ${course.title}`
+    : `I'd like to book the ${course.title_en} course`
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`
 
   return (
     <>
@@ -138,10 +146,32 @@ export default function CourseDetails() {
             <div className="lg:col-span-2">
               <div className="sticky top-24">
                 <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-olive-200/40" style={{ boxShadow: '0 12px 40px -12px rgba(42,44,20,0.15)' }}>
-                  <div className="bg-gradient-to-br from-olive-50 to-paper p-6 text-center border-b border-olive-100/60">
-                    <p className="text-3xl font-extrabold text-olive-900">
-                      {formatPrice(price.amount, price.currency)}
-                    </p>
+                  <div className="relative overflow-hidden bg-gradient-to-br from-olive-50 via-paper to-sticky-yellow/10 p-6 text-center border-b border-olive-100/60">
+                    {discountPercent !== null && (
+                      <div className="mb-3 flex justify-center">
+                        <span className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-3.5 py-1.5 text-xs font-extrabold text-red-700 shadow-sm">
+                          {discountPercent}% {t('discount_label')}
+                        </span>
+                      </div>
+                    )}
+                    {originalPrice ? (
+                      <div className="rounded-2xl border border-olive-100/80 bg-white/75 p-4 shadow-sm backdrop-blur-sm">
+                        <p className="text-xs font-semibold text-olive-400">{t('price_after_discount')}</p>
+                        <p className="mt-1 text-4xl font-extrabold tracking-tight text-olive-900">
+                          {formatPrice(price.amount, price.currency)}
+                        </p>
+                        <div className="mt-2 flex items-center justify-center gap-2 text-sm">
+                          <span className="text-olive-400">{t('price_before_discount')}</span>
+                          <span className="font-semibold text-olive-400 line-through decoration-red-400/70 decoration-2">
+                            {formatPrice(originalPrice.amount, originalPrice.currency)}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-3xl font-extrabold text-olive-900">
+                        {formatPrice(price.amount, price.currency)}
+                      </p>
+                    )}
                     {!price.isEgypt && (
                       <p className="mt-1 text-sm text-olive-400">
                         {formatPrice(course.international_price_usd, 'USD')}
@@ -159,13 +189,34 @@ export default function CourseDetails() {
                       ))}
                     </div>
 
-                    <div className="space-y-3">
-                      <label className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'card' ? 'border-olive-400 bg-olive-50/60' : 'border-olive-100 hover:border-olive-200'}`}>
+                    {!ONLINE_PAYMENTS_ENABLED && (
+                      <div className="mb-5 rounded-2xl border border-green-200 bg-green-50/70 p-4">
+                        <p className="text-sm font-bold text-olive-900">
+                          {t('whatsapp_booking_title')}
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-olive-600">
+                          {t('whatsapp_booking_note')}
+                        </p>
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3.5 text-base font-bold text-white transition-all hover:bg-green-700 hover:shadow-lg active:scale-[0.98]"
+                        >
+                          <MessageCircle className="h-5 w-5" />
+                          <span>{t('whatsapp_booking_button')}</span>
+                        </a>
+                      </div>
+                    )}
+
+                    <div className={`space-y-3 ${!ONLINE_PAYMENTS_ENABLED ? 'opacity-60' : ''}`}>
+                      <label className={`relative flex items-center gap-3 rounded-xl border-2 p-4 transition-all ${ONLINE_PAYMENTS_ENABLED ? 'cursor-pointer' : 'cursor-not-allowed'} ${paymentMethod === 'card' && ONLINE_PAYMENTS_ENABLED ? 'border-olive-400 bg-olive-50/60' : 'border-olive-100'}`}>
                         <input
                           type="radio"
                           name="payment"
-                          checked={paymentMethod === 'card'}
+                          checked={paymentMethod === 'card' && ONLINE_PAYMENTS_ENABLED}
                           onChange={() => setPaymentMethod('card')}
+                          disabled={!ONLINE_PAYMENTS_ENABLED}
                           className="h-4 w-4 accent-olive-600"
                         />
                         <div className="flex-1">
@@ -176,14 +227,20 @@ export default function CourseDetails() {
                             <img src="/meeza.svg" alt="Meeza" className="h-6 w-9 rounded border border-olive-100 shadow-sm object-contain" />
                           </div>
                         </div>
+                        {!ONLINE_PAYMENTS_ENABLED && (
+                          <span className="rounded-full bg-sticky-yellow px-2.5 py-1 text-[10px] font-bold text-olive-900">
+                            {t('payment_coming_soon')}
+                          </span>
+                        )}
                       </label>
 
-                      <label className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'instapay' ? 'border-olive-400 bg-olive-50/60' : 'border-olive-100 hover:border-olive-200'}`}>
+                      <label className={`flex items-center gap-3 rounded-xl border-2 border-olive-100 p-4 ${ONLINE_PAYMENTS_ENABLED ? 'cursor-pointer hover:border-olive-200' : 'cursor-not-allowed'}`}>
                         <input
                           type="radio"
                           name="payment"
                           checked={paymentMethod === 'instapay'}
                           onChange={() => setPaymentMethod('instapay')}
+                          disabled={!ONLINE_PAYMENTS_ENABLED}
                           className="h-4 w-4 accent-olive-600"
                         />
                         <div className="flex-1">
@@ -191,12 +248,13 @@ export default function CourseDetails() {
                         </div>
                       </label>
 
-                      <label className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'wallet' ? 'border-olive-400 bg-olive-50/60' : 'border-olive-100 hover:border-olive-200'}`}>
+                      <label className={`flex items-center gap-3 rounded-xl border-2 border-olive-100 p-4 ${ONLINE_PAYMENTS_ENABLED ? 'cursor-pointer hover:border-olive-200' : 'cursor-not-allowed'}`}>
                         <input
                           type="radio"
                           name="payment"
                           checked={paymentMethod === 'wallet'}
                           onChange={() => setPaymentMethod('wallet')}
+                          disabled={!ONLINE_PAYMENTS_ENABLED}
                           className="h-4 w-4 accent-olive-600"
                         />
                         <div className="flex-1">
@@ -205,13 +263,13 @@ export default function CourseDetails() {
                       </label>
                     </div>
 
-                    {paymentMethod === 'card' && (
+                    {ONLINE_PAYMENTS_ENABLED && paymentMethod === 'card' && (
                       <p className="mt-3 text-xs text-olive-400 text-center">
                         {t('payment_card_note')}
                       </p>
                     )}
 
-                    {paymentMethod === 'card' && (
+                    {ONLINE_PAYMENTS_ENABLED && paymentMethod === 'card' && (
                       <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4">
                         <div>
                           <label className="mb-1.5 block text-sm font-semibold text-olive-800">{tr('course_page', 'form_name')}</label>
@@ -243,7 +301,7 @@ export default function CourseDetails() {
                       </form>
                     )}
 
-                    {paymentMethod === 'instapay' && (
+                    {ONLINE_PAYMENTS_ENABLED && paymentMethod === 'instapay' && (
                       <div className="mt-5 space-y-3">
                         <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
                           <p className="text-sm font-semibold text-olive-700 mb-2">{t('instapay_step1')}</p>
@@ -285,7 +343,7 @@ export default function CourseDetails() {
                       </div>
                     )}
 
-                    {paymentMethod === 'wallet' && (
+                    {ONLINE_PAYMENTS_ENABLED && paymentMethod === 'wallet' && (
                       <div className="mt-5 space-y-3">
                         <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
                           <p className="text-sm font-semibold text-olive-700 mb-2">{t('wallet_step1')}</p>

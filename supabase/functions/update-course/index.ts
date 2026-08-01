@@ -39,7 +39,8 @@ Deno.serve(async (req) => {
     const allowed = [
       "title", "title_en", "description", "description_en",
       "curriculum", "curriculum_en", "egypt_price",
-      "international_price_usd", "is_active", "sort_order",
+      "original_egypt_price", "international_price_usd",
+      "original_international_price_usd", "is_active", "sort_order",
       "image_url", "icon",
     ];
     const safeUpdates: Record<string, unknown> = {};

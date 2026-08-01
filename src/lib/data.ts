@@ -9,8 +9,10 @@ export interface Course {
   curriculum_en: string[]
   image_url: string
   egypt_price: number
+  original_egypt_price: number | null
   egypt_currency: string
   international_price_usd: number
+  original_international_price_usd: number | null
   is_active: boolean
   sort_order: number
   icon: string
@@ -53,8 +55,10 @@ export const MOCK_COURSES: Course[] = [
     ],
     image_url: '/nadines.webp',
     egypt_price: 400,
+    original_egypt_price: null,
     egypt_currency: 'EGP',
     international_price_usd: 50,
+    original_international_price_usd: null,
     is_active: true,
     sort_order: 1,
     icon: 'Package',
@@ -84,8 +88,10 @@ export const MOCK_COURSES: Course[] = [
     ],
     image_url: '/nadines.webp',
     egypt_price: 1500,
+    original_egypt_price: null,
     egypt_currency: 'EGP',
     international_price_usd: 100,
+    original_international_price_usd: null,
     is_active: true,
     sort_order: 2,
     icon: 'Layers',

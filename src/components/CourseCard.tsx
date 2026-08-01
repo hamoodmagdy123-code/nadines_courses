@@ -1,5 +1,5 @@
 import type { Course } from '@/lib/data'
-import { formatPrice, getDisplayPrice } from '@/lib/pricing'
+import { formatPrice, getDiscountPercent, getDisplayPrice, getOriginalDisplayPrice } from '@/lib/pricing'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Check, Package, Layers } from 'lucide-react'
 import { useLang } from '@/i18n/context'
@@ -44,7 +44,9 @@ const THEMES = {
 export function CourseCard({ course, countryCode, variant = 'primary' }: Props) {
   const { data: rates } = useExchangeRates()
   const price = getDisplayPrice(course, countryCode, rates)
-  const { lang } = useLang()
+  const originalPrice = getOriginalDisplayPrice(course, countryCode, rates)
+  const discountPercent = originalPrice ? getDiscountPercent(price.amount, originalPrice.amount) : null
+  const { lang, t } = useLang()
   const { tr } = useSC()
   const title = lang === 'ar' ? course.title : course.title_en
   const desc = lang === 'ar' ? course.description : course.description_en
@@ -66,10 +68,22 @@ export function CourseCard({ course, countryCode, variant = 'primary' }: Props) 
           </div>
 
           <div className="absolute top-3 left-3 z-20 sm:top-4 sm:left-4">
-            <span className={`inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r ${theme.badge} px-3 py-1.5 text-xs font-bold text-white shadow-lg sm:px-4 sm:py-2 sm:text-sm`}>
-              {formatPrice(price.amount, price.currency)}
-            </span>
+            <div className={`rounded-xl bg-gradient-to-r ${theme.badge} px-3 py-2 text-white shadow-lg sm:px-4`}>
+              {originalPrice && (
+                <p className="text-[10px] font-medium text-white/70 line-through sm:text-xs">
+                  {formatPrice(originalPrice.amount, originalPrice.currency)}
+                </p>
+              )}
+              <p className="text-xs font-extrabold sm:text-sm">{formatPrice(price.amount, price.currency)}</p>
+            </div>
           </div>
+          {discountPercent !== null && (
+            <div className="absolute top-3 right-3 z-20 sm:top-4 sm:right-4">
+              <span className="inline-flex items-center rounded-full border border-white/50 bg-red-600 px-3 py-1.5 text-xs font-extrabold text-white shadow-lg ring-4 ring-red-600/10 sm:text-sm">
+                {discountPercent}% {t('discount_label')}
+              </span>
+            </div>
+          )}
 
           <div className="relative z-10 w-full max-w-[140px] sm:max-w-[180px] lg:max-w-[200px]">
             <img
@@ -108,10 +122,21 @@ export function CourseCard({ course, countryCode, variant = 'primary' }: Props) 
           </div>
 
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className={`text-lg font-extrabold ${theme.priceColor} sm:text-xl`}>
-                {formatPrice(price.amount, price.currency)}
-              </p>
+            <div className={originalPrice ? 'rounded-xl bg-olive-50/70 px-3 py-2' : ''}>
+              {originalPrice ? (
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <p className={`text-lg font-extrabold ${theme.priceColor} sm:text-xl`}>
+                    {formatPrice(price.amount, price.currency)}
+                  </p>
+                  <p className="text-xs font-semibold text-olive-400 line-through sm:text-sm">
+                    {formatPrice(originalPrice.amount, originalPrice.currency)}
+                  </p>
+                </div>
+              ) : (
+                <p className={`text-lg font-extrabold ${theme.priceColor} sm:text-xl`}>
+                  {formatPrice(price.amount, price.currency)}
+                </p>
+              )}
               {!price.isEgypt && (
                 <p className="text-[10px] text-olive-400 sm:text-xs">
                   {formatPrice(course.international_price_usd, 'USD')}

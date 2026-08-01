@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { Footer } from '@/components/Footer'
+import { WhatsAppButton } from '@/components/WhatsAppButton'
 
 export function PublicLayout() {
   return (
@@ -8,6 +9,7 @@ export function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      <WhatsAppButton />
     </div>
   )
 }

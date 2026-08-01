@@ -15,7 +15,9 @@ interface CourseForm {
   description_en: string
   slug: string
   egypt_price: number
+  original_egypt_price: number | null
   international_price_usd: number
+  original_international_price_usd: number | null
   image_url: string
   icon: string
   sort_order: number
@@ -25,7 +27,8 @@ interface CourseForm {
 
 const EMPTY_FORM: CourseForm = {
   title: '', title_en: '', description: '', description_en: '',
-  slug: '', egypt_price: 0, international_price_usd: 0,
+  slug: '', egypt_price: 0, original_egypt_price: null,
+  international_price_usd: 0, original_international_price_usd: null,
   image_url: '/nadines.webp', icon: 'Package', sort_order: 0,
   curriculum: [], curriculum_en: [],
 }
@@ -227,6 +230,14 @@ export default function AdminCourses() {
               <input type="number" value={newCourse.international_price_usd || ''} onChange={(e) => setNewCourse({ ...newCourse, international_price_usd: Number(e.target.value) })} className="input-field" dir="ltr" />
             </div>
             <div>
+              <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">{t('admin_original_egypt_price')}</label>
+              <input type="number" min="0" value={newCourse.original_egypt_price ?? ''} onChange={(e) => setNewCourse({ ...newCourse, original_egypt_price: e.target.value ? Number(e.target.value) : null })} placeholder={t('admin_original_price_placeholder')} className="input-field" dir="ltr" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">{t('admin_original_intl_price')}</label>
+              <input type="number" min="0" value={newCourse.original_international_price_usd ?? ''} onChange={(e) => setNewCourse({ ...newCourse, original_international_price_usd: e.target.value ? Number(e.target.value) : null })} placeholder={t('admin_original_price_placeholder')} className="input-field" dir="ltr" />
+            </div>
+            <div>
               <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">Image URL</label>
               <input value={newCourse.image_url} onChange={(e) => setNewCourse({ ...newCourse, image_url: e.target.value })} className="input-field" dir="ltr" />
             </div>
@@ -313,6 +324,16 @@ export default function AdminCourses() {
                   <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">{t('admin_intl_price')}</label>
                   <input type="number" value={getEdit(course.id, 'international_price_usd', course.international_price_usd) as number}
                     onChange={(e) => updateEdit(course.id, 'international_price_usd', Number(e.target.value))} className="input-field" dir="ltr" />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">{t('admin_original_egypt_price')}</label>
+                  <input type="number" min="0" value={(getEdit(course.id, 'original_egypt_price', course.original_egypt_price) as number | null) ?? ''}
+                    onChange={(e) => updateEdit(course.id, 'original_egypt_price', e.target.value ? Number(e.target.value) : null)} placeholder={t('admin_original_price_placeholder')} className="input-field" dir="ltr" />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-olive-500 uppercase tracking-wider">{t('admin_original_intl_price')}</label>
+                  <input type="number" min="0" value={(getEdit(course.id, 'original_international_price_usd', course.original_international_price_usd) as number | null) ?? ''}
+                    onChange={(e) => updateEdit(course.id, 'original_international_price_usd', e.target.value ? Number(e.target.value) : null)} placeholder={t('admin_original_price_placeholder')} className="input-field" dir="ltr" />
                 </div>
               </div>
 

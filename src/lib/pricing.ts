@@ -18,6 +18,26 @@ export function getDisplayPrice(course: Course, countryCode: string, rates?: Rec
   return { amount: converted, currency: targetCurrency, isEgypt: false }
 }
 
+export function getOriginalDisplayPrice(
+  course: Course,
+  countryCode: string,
+  rates?: Record<string, number> | undefined,
+): PriceDisplay | null {
+  if (countryCode === 'EG') {
+    if (!course.original_egypt_price || course.original_egypt_price <= course.egypt_price) return null
+    return { amount: course.original_egypt_price, currency: 'EGP', isEgypt: true }
+  }
+
+  if (!course.original_international_price_usd || course.original_international_price_usd <= course.international_price_usd) return null
+  const targetCurrency = getCurrencyForCountry(countryCode)
+  const converted = convertFromUSD(course.original_international_price_usd, targetCurrency, rates)
+  return { amount: converted, currency: targetCurrency, isEgypt: false }
+}
+
+export function getDiscountPercent(currentAmount: number, originalAmount: number): number {
+  return Math.round((1 - currentAmount / originalAmount) * 100)
+}
+
 const MAX_FRACTION: Record<string, number> = {
   BHD: 3, KWD: 3, OMR: 3, JOD: 3, LYD: 3, TND: 3, IQD: 0, LBP: 0,
 }

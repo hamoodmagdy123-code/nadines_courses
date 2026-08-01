@@ -27,7 +27,8 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const { title, title_en, description, description_en, curriculum, curriculum_en,
-            egypt_price, international_price_usd, image_url, icon, slug, sort_order } = body;
+            egypt_price, original_egypt_price, international_price_usd,
+            original_international_price_usd, image_url, icon, slug, sort_order } = body;
 
     if (!title || !slug) return errorResp("title and slug are required");
     if (typeof slug !== "string" || !/^[a-z0-9-]+$/.test(slug)) return errorResp("Invalid slug format");
@@ -47,7 +48,9 @@ Deno.serve(async (req) => {
         curriculum: curriculum || [],
         curriculum_en: curriculum_en || [],
         egypt_price: Number(egypt_price),
+        original_egypt_price: original_egypt_price ? Number(original_egypt_price) : null,
         international_price_usd: Number(international_price_usd),
+        original_international_price_usd: original_international_price_usd ? Number(original_international_price_usd) : null,
         image_url: image_url || null,
         icon: icon || "Package",
         slug,
