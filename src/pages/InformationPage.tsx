@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Mail, MapPin, Phone } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, BookOpen, ChevronRight, Mail, MapPin, Phone, RotateCcw, ShieldCheck, Truck } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { useLang } from '@/i18n/context'
 
@@ -9,7 +9,7 @@ const phone = '01282192085'
 const email = 'Nadinet389@gmail.com'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
-  return <section className="rounded-2xl border border-olive-100/70 bg-white p-5 shadow-sm sm:p-7"><h2 className="text-lg font-bold text-olive-900 sm:text-xl">{title}</h2><div className="mt-3 space-y-3 text-sm leading-7 text-olive-600 sm:text-base">{children}</div></section>
+  return <section className="policy-card"><div className="policy-card-number" aria-hidden="true" /><div><h2 className="text-base font-extrabold tracking-tight text-olive-900 sm:text-lg">{title}</h2><div className="mt-2 space-y-3 text-sm leading-7 text-olive-600 sm:text-[15px]">{children}</div></div></section>
 }
 
 export default function InformationPage({ page }: { page: Page }) {
@@ -21,12 +21,36 @@ export default function InformationPage({ page }: { page: Page }) {
     privacy: ar ? 'سياسة الخصوصية' : 'Privacy Policy', delivery: ar ? 'سياسة التسليم والشحن' : 'Delivery & Shipping Policy',
     refund: ar ? 'سياسة الاسترداد والإلغاء' : 'Refund & Cancellation Policy',
   }[page]
+  const subtitle = {
+    about: ar ? 'تعليم رقمي عملي، من الإسكندرية إلى العالم' : 'Practical digital education, from Alexandria to the world',
+    contact: ar ? 'نحن هنا للمساعدة قبل وبعد الشراء' : 'We are here to help before and after your purchase',
+    privacy: ar ? 'كيف نحمي بياناتك ونستخدمها بمسؤولية' : 'How we protect and responsibly use your information',
+    delivery: ar ? 'وصول رقمي واضح وسريع بعد تأكيد الدفع' : 'Clear, fast digital access after payment confirmation',
+    refund: ar ? 'شروط واضحة قبل إتمام عملية الشراء' : 'Clear terms before you complete your purchase',
+  }[page]
+  const PageIcon = { about: BookOpen, contact: Mail, privacy: ShieldCheck, delivery: Truck, refund: RotateCcw }[page]
+  const navItems: Array<{ key: Page; href: string; label: string }> = [
+    { key: 'about', href: '/about', label: ar ? 'من نحن' : 'About Us' },
+    { key: 'contact', href: '/contact', label: ar ? 'اتصل بنا' : 'Contact Us' },
+    { key: 'privacy', href: '/privacy-policy', label: ar ? 'الخصوصية' : 'Privacy' },
+    { key: 'delivery', href: '/delivery-shipping-policy', label: ar ? 'التسليم' : 'Delivery' },
+    { key: 'refund', href: '/refund-cancellation-policy', label: ar ? 'الاسترداد' : 'Refunds' },
+  ]
   const contact = <p><a className="font-semibold text-olive-800 underline" href={`mailto:${email}`}>{email}</a> · <a className="font-semibold text-olive-800 underline" href="tel:+201282192085">{phone}</a></p>
 
-  return <><Navbar /><div className="min-h-screen bg-paper pb-20 pt-28 sm:pt-32"><div className="mx-auto max-w-4xl px-4 sm:px-6">
-    <Link to="/" className="text-sm font-semibold text-olive-600 hover:text-olive-900">{ar ? '← العودة للرئيسية' : '← Back to home'}</Link>
-    <header className="mb-8 mt-6 rounded-3xl bg-olive-500 px-6 py-10 text-center sm:px-10"><p className="text-xs font-bold uppercase tracking-[.2em] text-sticky-yellow">Nadine Courses</p><h1 className="mt-3 text-3xl font-extrabold text-white sm:text-4xl">{title}</h1>{page !== 'about' && page !== 'contact' && <p className="mt-3 text-sm text-white/65">{ar ? 'آخر تحديث: 3 أغسطس 2026' : 'Last updated: August 3, 2026'}</p>}</header>
-    <div className="space-y-5">
+  return <><Navbar /><div className="policy-page min-h-screen pb-20 pt-24 sm:pt-28"><div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <Link to="/" className="group inline-flex items-center gap-2 rounded-full border border-olive-100 bg-white/80 px-4 py-2 text-xs font-bold text-olive-700 shadow-sm transition hover:-translate-y-0.5 hover:border-olive-200 hover:text-olive-900"><ArrowLeft className={`h-3.5 w-3.5 transition group-hover:-translate-x-0.5 ${ar ? 'rotate-180 group-hover:translate-x-0.5' : ''}`} />{ar ? 'العودة للرئيسية' : 'Back to home'}</Link>
+    <header className="policy-hero relative mt-5 overflow-hidden rounded-[1.75rem] bg-olive-900 px-6 py-8 sm:px-10 sm:py-10 lg:px-12">
+      <div className="policy-hero-grid" aria-hidden="true" />
+      <div className="relative z-10 grid items-end gap-7 md:grid-cols-[1fr_auto]">
+        <div className="max-w-2xl"><div className="mb-6 flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sticky-yellow text-olive-900 shadow-[3px_3px_0_rgba(255,255,255,.18)]"><PageIcon className="h-5 w-5" /></span><span className="text-[11px] font-extrabold uppercase tracking-[.22em] text-olive-200">Nadine Courses</span></div><h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">{title}</h1><p className="mt-3 max-w-xl text-sm leading-6 text-white/60 sm:text-base">{subtitle}</p></div>
+        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.06] px-3 py-2 text-xs font-semibold text-white/65 backdrop-blur-sm"><BadgeCheck className="h-4 w-4 text-sticky-yellow" />{page === 'about' || page === 'contact' ? (ar ? 'معلومات موثقة' : 'Verified information') : (ar ? 'محدثة في 3 أغسطس 2026' : 'Updated Aug 3, 2026')}</div>
+      </div>
+    </header>
+    <nav className="policy-mobile-nav mt-4 flex gap-2 overflow-x-auto pb-2 lg:hidden" aria-label={ar ? 'صفحات المعلومات' : 'Information pages'}>{navItems.map(item => <Link key={item.key} to={item.href} className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold transition ${page === item.key ? 'bg-olive-800 text-white' : 'border border-olive-100 bg-white text-olive-600'}`}>{item.label}</Link>)}</nav>
+    <div className="mt-7 grid gap-7 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
+      <aside className="sticky top-24 hidden rounded-2xl border border-olive-100/70 bg-white/75 p-2 shadow-sm backdrop-blur-sm lg:block"><p className="px-3 pb-2 pt-3 text-[10px] font-extrabold uppercase tracking-[.18em] text-olive-400">{ar ? 'معلومات مهمة' : 'Essential info'}</p>{navItems.map(item => <Link key={item.key} to={item.href} className={`group flex items-center justify-between rounded-xl px-3 py-3 text-sm font-bold transition ${page === item.key ? 'bg-olive-800 text-white shadow-sm' : 'text-olive-600 hover:bg-olive-50 hover:text-olive-900'}`}><span>{item.label}</span><ChevronRight className={`h-4 w-4 opacity-50 ${ar ? 'rotate-180' : ''}`} /></Link>)}</aside>
+      <main className="policy-content min-w-0 space-y-4">
       {page === 'about' && <>
         <Section title={ar ? 'تعلم مهارات عملية لبناء عملك الرقمي' : 'Practical skills for building your digital business'}><p>{ar ? 'نادين كورسز منصة تعليمية رقمية مقرها العصافرة، الإسكندرية، مصر. نقدم كورسات عملية تساعد المبتدئين وصناع المحتوى وأصحاب المشاريع على بناء المنتجات الرقمية وتقديم الخدمات عبر الإنترنت.' : 'Nadine Courses is a digital education business based in Asafra, Alexandria, Egypt. We provide practical online courses that help beginners, creators, and entrepreneurs build digital products and offer services online.'}</p><p>{ar ? 'تم تصميم المحتوى ليكون واضحًا وقابلًا للتطبيق، مع خطوات عملية ودعم مباشر بعد الشراء.' : 'Our content is designed to be clear and actionable, with practical steps and direct support after purchase.'}</p></Section>
         <Section title={ar ? 'منتجاتنا' : 'Our products'}><p>{ar ? 'نقدم حاليًا كورس Digital Product بسعر 400 جنيه مصري (50 دولارًا دوليًا)، وكورس Drop Service بسعر 1,500 جنيه مصري (100 دولار دوليًا). تظهر الأسعار النهائية بوضوح قبل الدفع.' : 'We currently offer the Digital Product course for EGP 400 (USD 50 internationally) and the Drop Service course for EGP 1,500 (USD 100 internationally). Final prices are clearly displayed before payment.'}</p><Link to="/#courses" className="font-bold text-olive-800 underline">{ar ? 'عرض الكورسات والأسعار' : 'View courses and prices'}</Link></Section>
@@ -47,6 +71,7 @@ export default function InformationPage({ page }: { page: Page }) {
         <Section title={ar ? 'الإلغاء' : 'Cancellation'}><p>{ar ? 'يمكنك التراجع قبل إتمام الدفع. بعد نجاح الدفع، لا يمكن إلغاء الطلب أو استرداد قيمته.' : 'You may abandon the purchase before completing payment. Once payment succeeds, the order cannot be cancelled or refunded.'}</p></Section>
         <Section title={ar ? 'مشكلات الدفع والوصول' : 'Payment or access issues'}><p>{ar ? 'إذا خُصم المبلغ أكثر من مرة للطلب نفسه أو لم نتمكن من توفير الكورس، تواصل معنا لمراجعة الخطأ وتصحيحه. لا يؤثر ذلك على أي حقوق إلزامية يقررها القانون.' : 'If you were charged more than once for the same order or we cannot provide the purchased course, contact us so we can investigate and correct the error. This does not limit mandatory rights under applicable law.'}</p>{contact}</Section>
       </>}
+      </main>
     </div>
   </div></div></>
 }

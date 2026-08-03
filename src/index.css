@@ -448,6 +448,60 @@
   }
 }
 
+/* Compliance and business information pages */
+.policy-page {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(245, 233, 96, 0.12), transparent 22rem),
+    radial-gradient(circle at 92% 38%, rgba(183, 188, 133, 0.16), transparent 24rem),
+    var(--color-paper);
+}
+.policy-hero { box-shadow: 0 24px 70px -32px rgba(42, 44, 20, 0.75); }
+.policy-hero-grid {
+  position: absolute;
+  inset: 0;
+  opacity: .13;
+  background-image: linear-gradient(rgba(255,255,255,.25) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.25) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(110deg, transparent 5%, black 70%);
+}
+.policy-content { counter-reset: policy-section; }
+.policy-card {
+  counter-increment: policy-section;
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(228, 230, 203, .75);
+  border-radius: 1.25rem;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 7px 24px -20px rgba(42,44,20,.42);
+  transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+.policy-card:hover { transform: translateY(-2px); border-color: var(--color-olive-200); box-shadow: 0 18px 38px -28px rgba(42,44,20,.5); }
+.policy-card-number {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: .8rem;
+  background: var(--color-olive-50);
+  color: var(--color-olive-700);
+  font: 800 .72rem/1 var(--font-display);
+}
+.policy-card-number::after { content: "0" counter(policy-section); }
+.policy-card a { text-underline-offset: 4px; }
+.policy-mobile-nav { scrollbar-width: none; }
+.policy-mobile-nav::-webkit-scrollbar { display: none; }
+@media (min-width: 640px) {
+  .policy-card { grid-template-columns: 3.25rem minmax(0, 1fr); gap: 1.25rem; padding: 1.6rem 1.75rem; }
+  .policy-card-number { width: 2.75rem; height: 2.75rem; }
+}
+@media (max-width: 420px) {
+  .policy-card { grid-template-columns: 1fr; }
+  .policy-card-number { width: 2.25rem; height: 2.25rem; }
+}
+
 @media (max-width: 640px) {
   .glass,
   [class*="backdrop-blur"] {
