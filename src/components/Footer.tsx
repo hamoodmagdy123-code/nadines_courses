@@ -31,8 +31,12 @@ export function Footer() {
 
   const links = [
     { href: '/', label: tr('footer', 'home') || (lang === 'ar' ? 'الرئيسية' : 'Home') },
-    { href: '#courses', label: tr('footer', 'courses') || (lang === 'ar' ? 'الكورسات' : 'Courses') },
-    { href: '#faq', label: tr('footer', 'faq') || (lang === 'ar' ? 'الأسئلة الشائعة' : 'FAQ') },
+    { href: '/#courses', label: tr('footer', 'courses') || (lang === 'ar' ? 'الكورسات' : 'Courses') },
+    { href: '/about', label: lang === 'ar' ? 'من نحن' : 'About Us' },
+    { href: '/contact', label: lang === 'ar' ? 'اتصل بنا' : 'Contact Us' },
+    { href: '/privacy-policy', label: lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' },
+    { href: '/delivery-shipping-policy', label: lang === 'ar' ? 'سياسة التسليم' : 'Delivery & Shipping' },
+    { href: '/refund-cancellation-policy', label: lang === 'ar' ? 'الاسترداد والإلغاء' : 'Refund & Cancellation' },
   ]
 
   return (
@@ -50,7 +54,7 @@ export function Footer() {
             <span className="text-lg font-bold text-olive-900">{lang === 'ar' ? 'نادين كورسز' : 'Nadine Courses'}</span>
           </Link>
 
-          <div className="flex gap-8 text-sm text-olive-500">
+          <div className="flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-olive-500">
             {links.map((item) => (
               <a key={item.href} href={item.href} className="relative font-medium transition-colors duration-200 hover:text-olive-800 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:rounded-full after:bg-olive-400 after:transition-all after:duration-300 hover:after:w-full">
                 {item.label}

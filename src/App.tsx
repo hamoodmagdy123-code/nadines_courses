@@ -12,6 +12,7 @@ const Home = lazy(() => import('@/pages/Home'))
 const CourseDetails = lazy(() => import('@/pages/CourseDetails'))
 const CheckoutSuccess = lazy(() => import('@/pages/CheckoutSuccess'))
 const CheckoutFailed = lazy(() => import('@/pages/CheckoutFailed'))
+const InformationPage = lazy(() => import('@/pages/InformationPage'))
 const AdminLogin = lazy(() => import('@/pages/admin/Login'))
 const Dashboard = lazy(() => import('@/pages/admin/Dashboard'))
 const AdminCourses = lazy(() => import('@/pages/admin/Courses'))
@@ -54,6 +55,11 @@ export default function App() {
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<Home />} />
                 <Route path="/course/:slug" element={<CourseDetails />} />
+                <Route path="/about" element={<InformationPage page="about" />} />
+                <Route path="/contact" element={<InformationPage page="contact" />} />
+                <Route path="/privacy-policy" element={<InformationPage page="privacy" />} />
+                <Route path="/delivery-shipping-policy" element={<InformationPage page="delivery" />} />
+                <Route path="/refund-cancellation-policy" element={<InformationPage page="refund" />} />
               </Route>
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
               <Route path="/checkout/failed" element={<CheckoutFailed />} />

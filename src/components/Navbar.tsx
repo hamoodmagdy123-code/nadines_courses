@@ -40,8 +40,8 @@ export function Navbar() {
 
           <div className="hidden items-center gap-0.5 sm:flex">
             {[
-              { href: '#courses', key: 'nav_courses' as const },
-              { href: '#faq', key: 'nav_faq' as const },
+              { href: '/#courses', key: 'nav_courses' as const },
+              { href: '/#faq', key: 'nav_faq' as const },
             ].map((item) => (
               <a
                 key={item.href}
@@ -63,7 +63,7 @@ export function Navbar() {
               <span className="hidden sm:inline">{lang === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
-            <a href="#courses" className="btn-primary !rounded-lg !px-3 !py-1.5 !text-[11px] sm:!px-4 sm:!py-2 sm:!text-xs">
+            <a href="/#courses" className="btn-primary !rounded-lg !px-3 !py-1.5 !text-[11px] sm:!px-4 sm:!py-2 sm:!text-xs">
               {t('nav_cta')}
             </a>
 
@@ -84,8 +84,8 @@ export function Navbar() {
       <div className={`fixed top-[60px] inset-x-0 z-40 mx-3 transition-all duration-300 sm:hidden ${mobileOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
         <div className="rounded-xl bg-white/95 backdrop-blur-xl p-3 border border-olive-100/50" style={{ boxShadow: '0 12px 40px -10px rgba(42,44,20,0.15)' }}>
           {[
-            { href: '#courses', key: 'nav_courses' as const },
-            { href: '#faq', key: 'nav_faq' as const },
+            { href: '/#courses', key: 'nav_courses' as const },
+            { href: '/#faq', key: 'nav_faq' as const },
           ].map((item) => (
             <a
               key={item.href}

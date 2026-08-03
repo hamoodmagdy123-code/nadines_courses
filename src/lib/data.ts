@@ -110,13 +110,13 @@ export const MOCK_SITE_CONTENT: SiteContentData = {
       question: 'إيه طريقة التسليم؟',
       answer: 'بعد الدفع، هنتواصل معاك على تليجرام وتاخد كل المحتوى.',
       question_en: 'How is the course delivered?',
-      answer_en: 'After payment, we\'ll contact you on Telegram and you\'ll get all the content.',
+      answer_en: 'After your payment is verified, we will contact you within one hour using the contact details submitted with your order to arrange access to the course.',
     },
     {
-      question: 'هل في ضمان استرجاع؟',
-      answer: 'لو الكورس مش مناسب ليك خلال أول 7 أيام، هنرجعلك فلوسك.',
-      question_en: 'Is there a refund guarantee?',
-      answer_en: 'If the course isn\'t right for you within the first 7 days, we\'ll refund your money.',
+      question: 'هل يمكن استرداد أو إلغاء الطلب؟',
+      answer: 'لا يمكن استرداد المبلغ أو إلغاء الطلب بعد إتمام الدفع، لأن الكورسات منتجات رقمية يتم تجهيز الوصول إليها فور تأكيد الدفع.',
+      question_en: 'Can I request a refund or cancel my order?',
+      answer_en: 'Payments are non-refundable and orders cannot be cancelled after payment because the courses are digital products and access is prepared as soon as payment is confirmed.',
     },
     {
       question: 'بتدفع إزاي؟',

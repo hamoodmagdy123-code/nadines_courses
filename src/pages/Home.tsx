@@ -528,7 +528,7 @@ function CTASection() {
             <span className="h-1 w-1 rounded-full bg-white/20" />
             <span className="flex items-center gap-1.5">
               <Send className="h-3 w-3" />
-              {lang === 'ar' ? 'تسليم فوري' : 'Instant delivery'}
+              {lang === 'ar' ? 'تواصل خلال ساعة' : 'Contact within 1 hour'}
             </span>
           </div>
         </RevealSection>
