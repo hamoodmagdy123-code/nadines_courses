@@ -348,10 +348,10 @@ export default function CourseDetails() {
                         <div className="rounded-xl bg-olive-50/60 p-4 border border-olive-100/60">
                           <p className="text-sm font-semibold text-olive-700 mb-2">{t('wallet_step1')}</p>
                           <div className="flex items-center justify-between rounded-lg bg-white p-3 border border-olive-100">
-                            <span className="font-bold text-lg text-olive-900" dir="ltr">+201282192085</span>
+                            <span className="font-bold text-lg text-olive-900" dir="ltr">+201063167656</span>
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText('+201282192085').then(() => {
+                                navigator.clipboard.writeText('+201063167656').then(() => {
                                   setCopied('wallet')
                                   setTimeout(() => setCopied(null), 2000)
                                 })
