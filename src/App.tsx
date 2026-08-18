@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import TagManager from 'react-gtm-module'
 import { LangProvider } from '@/i18n/context'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 import { PublicLayout } from '@/pages/PublicLayout'
 import { AdminLayout } from '@/pages/admin/AdminLayout'
@@ -75,6 +76,7 @@ export default function App() {
         </BrowserRouter>
       </LangProvider>
       <Analytics />
+      <SpeedInsights />
     </QueryClientProvider>
   )
 }
